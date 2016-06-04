@@ -17,10 +17,12 @@ Josef Válek \and Ondřej Plátek}
 \maketitle              % typeset the title of the contribution
 
 \begin{abstract}
-The abstract should summarize the contents of the paper
-using at least 70 and at most 150 words. It will be set in 9-point
-font size and be inset 1.0 cm from the right and left margins.
-There will be two blank lines before and after the Abstract. \dots
+This paper discuss alternatives for dialog state tracking using recurrent neural networks (RNN).
+We present experiment on standard dialog state tracking (DST) dataset DSTC2 \cite{todo}.
+RNN models became state of the art in DST. 
+On the other hand most state-of-the-art models are only turn-based and some require preprocessing tailored for DSTC2. 
+We implemented three architectures which can be used in incremental settings and requires almost no preprocessing.
+We compare them to the benchmarks on DSTC2 and discuss their properties.
 \end{abstract}
 %
 \section{Fixed-Period Problems: The Sublinear Case}
