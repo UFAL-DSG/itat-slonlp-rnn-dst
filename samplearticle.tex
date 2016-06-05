@@ -17,26 +17,32 @@ Josef Válek \and Ondřej Plátek}
 \maketitle              % typeset the title of the contribution
 
 \begin{abstract}
-This paper discuss alternatives for dialog state tracking using recurrent neural networks (RNN).
-We present experiment on standard dialog state tracking (DST) dataset DSTC2 \cite{todo}.
-RNN models became state of the art in DST. 
-On the other hand most state-of-the-art models are only turn-based and some require preprocessing tailored for DSTC2. 
+This paper discuss models for dialog state tracking using recurrent neural networks (RNN).
+We present experiment on standard dialog state tracking (DST) dataset DSTC2\cite{todo}.
+On one hand, RNN models became state of the art in DST,
+on the other hand most state-of-the-art models are only turn-based and require preprocessing specific to evaluated dataset (e.g. DSTC2) to achieve state-of-the-art results.
 We implemented three architectures which can be used in incremental settings and requires almost no preprocessing.
-We compare them to the benchmarks on DSTC2 and discuss their properties.
+We compare their performance to the benchmarks on DSTC2 and discuss their properties.
+With only a trivial preprocessing we were able to beat a baseline, but our models are not competitive with state-of-the-art.
 \end{abstract}
 %
-\section{Fixed-Period Problems: The Sublinear Case}
+\section{Introduction}
 %
-With this chapter, the preliminaries are over, and we begin the search
-for periodic solutions to Hamiltonian systems. All this will be done in
-the convex case; that is, we shall study the boundary-value problem
-\begin{eqnarray*}
-  \dot{x}&=&JH' (t,x)\\
-  x(0) &=& x(T)
-\end{eqnarray*}
-with $H(t,\cdot)$ a convex function of $x$, going to $+\infty$ when
-$\left\|x\right\| \to \infty$.
+The dialog state tracking (DST) is a standard and important task for evaluating conversational agents\cite{dstc1, dstc2, dstc3, HIS model}.
+The dialog state tracker summarizes hidden information state (HIS) \cite{todo} of the conversation history into formal language typically represented as a dialog act item (DAI) $(actionType, slotName, slotValue)$.
+It was shown that the better dialog state tracking of HIS the conversation agents are able to achieve the better success rate they have in overall completion of the task oriented conversation.\cite{Steve Yound, Henderson,..Zilka, Alex}
+The dialog state tracking translates ambiguous natural language into formal language which is convenient for reasoning and accessing external knowledges, both important aspects of successful conversation in task oriented dialog.
 
+Most state of  todo
+
+\begin{figure}
+\vspace{2.5cm}
+% \includesvg{rnn}
+\includegraphics[width=\textwidth]{rnn}
+
+\caption{This is the caption of the figure displaying a white eagle and
+a white horse on a snow field}
+\end{figure}
 %
 \subsection{Autonomous Systems}
 %
@@ -122,11 +128,6 @@ show that this implies that there is an $\eta > 0$ such that
   \label{eq:two}
 \end{equation}
 
-\begin{figure}
-\vspace{2.5cm}
-\caption{This is the caption of the figure displaying a white eagle and
-a white horse on a snow field}
-\end{figure}
 
 Since $u_{1}$ is a smooth function, we will have
 $\left\|hu_{1}\right\|_\infty \le \eta$
