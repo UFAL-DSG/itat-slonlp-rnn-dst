@@ -11,8 +11,8 @@
 
 \title{Recurrent neural networks for dialog state tracking}
 
-\author{Petr Bělohlávek \and Vojtěch Hudeček \and
-Josef Válek \and Ondřej Plátek \and TODOFilip}
+\author{Ondřej Plátek \and Petr Bělohlávek \and Vojtěch Hudeček \and
+Josef Válek \and TODOFilip}
 
 \institute{Charles University in Prague,\\
 \email{oplatek@ufal.mff.cuni.cz},\\ 
@@ -55,7 +55,7 @@ See Section~\ref{todo} for details.
 Tracking only constraints of the restaurants in the dialog state allow us to annotate the dialog state as query to database, which is much simpler interface for human annotators than selecting many options from Dstc2 ontology.
 Simplifying the dialog state while maintaining the accuracy allows simpler portability of proposed models to new domains.
 
-We also show that Dstc2 dataset suffers from data disbalance between training, development and test set.
+We also show that Dstc2 dataset suffers from difference between training, development and test data.
 The Dstc2 test set was collected in \todo{different scenario} \cite{dstc2henderson}.
 Since the data of training, development and test set are distributed differently the resulting performance between training and test accuracy is rather high. 
 Our experiments showed that by random resplitting of the Dstc2 data one obtain much better results.
@@ -116,13 +116,24 @@ feeding data - history prefix, turn by turn
 
 
 \begin{figure}
-\includegraphics[width=\textwidth]{rnn}
-\caption{The RNN encodes dialog history}
+\includegraphics[width=0.5\textwidth]{encoder}
+\caption{The RNN encodes the word history into dialog state $h_T$ and predict slot values independently.}
 \end{figure}
 
 \subsection{Data preparation experiments}
 
 \section{Related work}
+Our system is related to RNN tracker of \cite{Zilka} which reported near state-of-the art result on Dstc2 dataset and was the first incremental system which was able to update the dialog state word-by-word with such accuracy.
+In contrast to work of \cite{Zilka} we use no abstraction of slot values but we add the additional features as described in Section~\ref{todo_model_input_featurs}.
+The first system which used Neural Network for dialog state tracking \cite{henderson} used feed forward network and manually engineered more than ten features across different levels of abstraction of the user input including spoken language understanding component (SLU).
+In our work we focus on simplifying the architecture and so we use only features which are explicitly given by the dialog history word representation and the task database.
+
+The system of \cite{Word-based dialog state tracking with recurrent neural networks-Henderson} gives state-of-the-art results and like our system it predicts the dialog state from words using a recurrent neural networks.
+On the other hand their system heavily relies on abstracting user input.
+Another dialog state tracker with LSTM was used in reinforcement setting but they also used information from SLU pipeline.\cite{Dialog History Construction with Long-Short Term Memory for Robust Generative Dialog State Tracking}
+
+It is worth noting that there are first attempts to train end-to-end dialog system even without explicitly modelling dialog state\cite{Weston} which simplifies the overall architecture of a dialog system.
+However, the end-to-end model was evaluated only on artificial dataset and cannot be compared to dstc2 dataset directly.
 
 \section{Conclusion}
 
