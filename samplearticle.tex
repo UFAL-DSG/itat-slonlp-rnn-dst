@@ -1,10 +1,11 @@
 \documentclass{itatnew}
-%% !!!dolezite: ak pisete po slovensky alebo po cesky pouzite
-%% \documentclass[slovensky]{itatnew}
-%% \documentclass[cesky]{itatnew}
+\usepackage{todonotes}
+\presetkeys{todonotes}{inline}{}
+\presetkeys{todonotes}{prepend}{}
+\presetkeys{todonotes}{caption=TODO}{}
+
 \def\OP#1{\textcolor{purple}{OP: \textit{#1}}}
-\def\todo#1{\textcolor{purple}{OP: \textit{#1}}}
-% \def\todo#1{\todo[noprepend,color=yellow!30]{TODO: #1}}
+% \def\todo#1{\textcolor{purple}{OP: \textit{#1}}}
 
 \begin{document}
 
@@ -67,13 +68,36 @@ Second, we analyze the Dstc2 dataset and propose changes for further data collec
 
 \section{Models}
 
+Our models are all based on Recurrent Neural Network encoder\cite{todo} and similarly to RNN encoder\cite{Lukas} the models update its hidden state $h_{enc}$ after each word.
+On the other hand, the models differ how they predict {\it goal} labels $food$, $area$ and $price range$ from the encoded state.
+
+The first model predicts the triples of slot values $(food, area, price range)$ jointly from the encoder hidden state $h_{enc}$.
+The second model predicts the labels independently employing a three classifiers where each of the predicts either $food$, $area$ or $price range$ based on $h_{enc}$. 
+The last model uses a decoder for predicting values one after each other from the $h_{enc}$ and the whole model is implementation of encoder-decoder model successfully used in machine translation\cite{bahdanou}.
+
+We implemented all three models in TensorFlow\cite{tensorflow} framework and by introducing more and more complex model we tried to balance data sparsity problem and incorrect independence assumptions.
+
+\subsection{Prediction labels jointly}
+todo describe encoder -how featers are fead
+decoding - directly predicting triples
+problem unseen combination on dev data/test data
+
+\subsection{Predicting labels independently}
+Encoding input features into encoder hidden state  
+
+\subsection{Encoder decoder framework}
+Encoding input features into encoder hidden state is the same.
+We use attention
+
 \section{Experiments}
+
+\subsection{training}
+feeding data - history prefix, turn by turn
 
 \subsection{Labels representation evaluation}
 
 \begin{table}
-\caption{This is the example table taken out of {\it The
-\TeX{}book,} p.\,246}
+\caption{Accuracy on development and {\it Dstc2 test set }}
 \begin{center}
 \begin{tabular}{r@{\quad}rl}
 \hline
