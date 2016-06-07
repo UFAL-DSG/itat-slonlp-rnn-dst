@@ -48,14 +48,14 @@ It was shown that with a better dialog state tracking of HIS the conversation ag
 The dialog state tracking translates ambiguous natural language into formal language which is convenient for reasoning and accessing external knowledge. Both these are important aspects of successful conversation in task oriented dialog.
 
 Most state-of-the-art system in DST have reported their performance on DSTC2 dataset\cite{henderson2014second}. 
-The full dataset is freely available since January 2014 and contains \todo{X} dialogues in training set, \todo{Y} dialogues in dev set and \todo{Z} dialogues in the test set.
+The full dataset is freely available since January 2014 and contains 1906 dialogues in training set, 212 dialogues in development set and 1117 dialogues in the test set.
 The conversations are annotated at turn level where the hidden information state was annotated manually in form of $(actionType, slotName, slotValue)$
 according to the
 domain ontology.
 The ontology of DSTC2 captures a~restaurant domain and was also manually designed.
 The dataset also contains a database of restaurants and their properties.\footnote{There are six columns in the database: name, food, price\_range, area, telephone, address.}
 
-Our experiments predict dialog state only from \todo{ASR transcription of conversation history } and a word feature which fires if a word may be property from database.
+Our experiments predict dialog state only from \OP{TODO VERIFY: ASR transcription of conversation history } and a word feature which fires if a word may be property from database.
 We argue that using only database values instead of full ontology is not only simpler but also more natural because the system can inform users only about the values in the database.
 In addition, we show in Section \ref{sec:eval} that we achieve strong performance.
 
@@ -137,7 +137,7 @@ Since our target sequence is always of length four the model does not suffer fro
 \section{Experiments}
 \label{sec:exp}
 We report results on the standard split where we used 10\% of data from $train\_dev$ data as a validation set for early stopping\cite{prechelt1998early} and 90\% for training.
-The joint slot accuracy is predicted from \todo{ASR transcription only}.
+The joint slot accuracy is predicted from \OP{VERIFY GOLD OR ASR transcription only}.
 We report accuracy  on development set which we created and official test set. See~Table~\ref{tab:dstc}.
 % \todo{nechceme reportovat i train a valid? me to vetsinou v clancich zajima} muzem kdyz to stihnem, ale validace na trenovani trva dlouho a nechce se mi to prepocitavat na validacni sade to mame
 
@@ -200,7 +200,7 @@ The encoder decoder strongly outperformed previous models and the time needed fo
 \label{sec:split}
 The data for DSTC2 test set were obtained from another system than the data for validation and training set.\cite{henderson2014second}.
 We wanted to investigate how this influences the complexity of the dataset so we merge all DSTC2 data together and created splits of 80\%, 10\% and 10\% for training, development and test set.
-The results in Table~\ref{ref:resplit} show that the complexity of the task dropped significantly.
+The results in Table~\ref{tab:resplit} show that the complexity of the task dropped significantly.
 
 \begin{table}
 \caption{Accuracy on dev and test set of resplitted DSTC2 data}
