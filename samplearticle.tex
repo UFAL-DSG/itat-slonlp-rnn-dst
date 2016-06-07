@@ -127,7 +127,7 @@ We report results on the standard split where we used 10\% of data from $train\_
 The joint slot accuracy is predicted from \todo{ASR transcription only}.
 We report accuracy  on development set which we created and official test set. See~Table~\ref{tab:dstc}.
 
-For all our experiments we use word embeddings of size 40, encoder size of size 50, dropout with keep probability of 0.9.
+For all our experiments we use word embeddings of size 100, encoder size of size 100, dropout with keep probability of 0.7 for encoder inputs and outputs.
 These parameters where selected after grid search on the parameters.
 
 \subsection{Training}
@@ -166,7 +166,7 @@ See Table~\ref{tab:dstc} and Table~\ref{tab:resplit} for details.
 \hline\rule{0pt}{12pt}
 Joint  &     ?&  todo \\
 Indep  &   todo& todo \\
-EncDec &   todo& todo \\
+EncDec &   0.94 & todo \\
 \hline
 \end{tabular}
 \end{center}
@@ -193,8 +193,8 @@ The results in Table~\ref{ref:resplit} show that tasked complexity significantly
                    Model}&\multicolumn{1}{l}{Dev set}&\multicolumn{2}{l}{Test set}\\[2pt]
 \hline\rule{0pt}{12pt}
 Joint  &     ?&  todo \\
-Indep  &   todo& todo \\
-EncDec &   todo& todo \\
+Indep  &   0.87 & todo \\
+EncDec &   0.94 & todo \\
 \hline
 \end{tabular}
 \end{center}
@@ -217,19 +217,19 @@ However, the reported end-to-end model was evaluated only on artificial dataset 
 
 \section{Conclusion and Future work}
 \label{sec:conc}
-We eval
-
+We presented a dialog state tracking models which represents state of the art models using recurrent neural networks and compare them against each other.
+To our knowledge we were the first who used encoder-decoder model for the dialog state tracking task, and we encourage others to do so because it outperformed other standard RNN models.
+We also suggest that evaluating dialog state tracking in  Dstc2 test set is notoriously hard and that the task become substantially easier if the data are reshuffled.
 
 \subsection*{Future work}
-Use standard evaluation metrics on Dstc2 including L2 norm and predict method and requested slots.
-Collect and annotate data so we can evaluate the models on another task oriented dataset.
-
-
+In the future we plan to evaluate the models using standard evaluation metrics on Dstc2 including L2 norm.
+We also plan to predict all slots tracked in the Dstc2 dataset.
+Another direction of our future work will focus on collecting and annotating data so we can evaluate the models on another task oriented dataset.
 
 
 \paragraph{Acknowledgement}
-We would like to thank nvidia, gauk, filipgrant.
-
+This research was partly funded by the Ministry of Education, Youth and Sports of the Czech Republic under the grant agreement LK11221, core research funding, grant GAUK 1915/2015, and also partially supported by SVV project number 260 224. 
+We gratefully acknowledge the support of NVIDIA Corporation with the donation of the Tesla K40c GPU used for this research.
 
 
 \bibliography{samplearticle}
