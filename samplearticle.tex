@@ -69,83 +69,152 @@ Second, we analyze the Dstc2 dataset and propose changes for further data collec
 \section{Models}
 
 Our models are all based on Recurrent Neural Network encoder\cite{todo} and similarly to RNN encoder\cite{Lukas} the models update its hidden state $h_{enc}$ after each word.
-On the other hand, the models differ how they predict {\it goal} labels $food$, $area$ and $price range$ from the encoded state.
+The models differ only how they predict {\it goal} labels $food$, $area$ and $price range$ from the RNN's encoded state.
 
 The first model predicts the triples of slot values $(food, area, price range)$ jointly from the encoder hidden state $h_{enc}$.
 The second model predicts the labels independently employing a three classifiers where each of the predicts either $food$, $area$ or $price range$ based on $h_{enc}$. 
 The last model uses a decoder for predicting values one after each other from the $h_{enc}$ and the whole model is implementation of encoder-decoder model successfully used in machine translation\cite{bahdanou}.
 
+The RNN encoders takes word embedding and several binary features as input at each step.
+The binary features for each word are speaker role representing either user or system and also binary features indicating whether the word is part of some named entity representing value from database.
+Since Dstc2 database is a simple table with six columns we introduce six binary features firing if the word is substring of named entity at given column.
+For example the word $indian$ will trigger feature for column $food$ and its value $indian$ but also for column restaurant $name$ and its value $indian heaven$.
+
 We implemented all three models in TensorFlow\cite{tensorflow} framework and by introducing more and more complex model we tried to balance data sparsity problem and incorrect independence assumptions.
 
-\subsection{Prediction labels jointly}
-todo describe encoder -how featers are fead
-decoding - directly predicting triples
-problem unseen combination on dev data/test data
+\subsection{Predicting labels jointly}
+Joint model uses a single classifier to predict a tuple of slots. 
+See Figure~\ref{fig:encjoint}.
+The model is easy to implement and optimizes directly the evaluation metric of predicting the labels jointly.
+However, with increasing number of predicted slots the model suffer from curse of dimensionality and therefore it is not convenient for small datasets.
+\begin{figure}
+\includegraphics[width=0.5\textwidth]{encoder_joint}
+\caption{The joint label predictions using RNN.}
+\label{fig:encjoint}
+\end{figure}
 
 \subsection{Predicting labels independently}
-Encoding input features into encoder hidden state  
+Independent slots prediction using one classifier per each slot is also very easy to implement.
+It does not suffer from curse of dimensionality but it introduce unrealistic assumption of uncorrelated slot properties.
+In case of Dstc2 and Cambridge restaurant domain it is hard to believe that slots $area$ and $price range$ do not correlate.
+\begin{figure}
+\includegraphics[width=0.5\textwidth]{encoder}
+\caption{The RNN encodes the word history into dialog state $h_T$ and predicts slot values independently.}
+\label{fig:encind}
+\end{figure}
 
 \subsection{Encoder decoder framework}
-Encoding input features into encoder hidden state is the same.
-We use attention
+The encoder decoder model with attention\cite{Bahdanout} is the most sophisticated model we used for slot predictions.
+To our knowledge we are first who used this model for the task of slot predictions.
+The model is typically used in machine translation, does its accuracy does not suffer when predicting longer tuples\cite{Bahdnadou} and it captures correlation between decoded slots easily\cite{LM with attention}.
+
+The disadvantage of this model is its complexity.
+First the model is not straight forward to implement\footnote{We modified code from TensorFlow `seq2seq` module.} and also the decoding time is quadratic in length of decoded tuples.
+However, we used the model to predict always three labels for first, second and third slot.
+\begin{figure}
+\includegraphics[width=0.5\textwidth]{encdec}
+\caption{Encoder decoder with attention predicts goals.}
+\label{fig:encdec}
+\end{figure}
 
 \section{Experiments}
+We report results on the standard split where we used 10\% of data from $train\_dev$ data for early stopping\cite{early stopping} and 90\% for training.
+The joint slot accuracy is predicted from \todo{ASR transcription only}.
+We report accuracy  on development set which we created and official test set. See~Table~\ref{tab:dstc}.
 
-\subsection{training}
-feeding data - history prefix, turn by turn
+For all our experiments we use word embeddings of size 40, encoder size of size 50, dropout with keep probability of 0.9.
+These parameters where selected after grid search on the parameters.
+
+\subsection{Training}
+The training is optimized using cross-entropy loss function and Adam optimizer\cite{todo_adam} with batch size ten.
+We train predicting goal slot values at the end of each turn by feeding to the model the turn slot labels $labels_t$ and the whole dialog history until the turn $t$.
+Since dialog lengths vary, we employ bucketing of 10 buckets to speed up the computation and we reshuffle the data after each epoch only within a bucket.
+Early stopping with patience of four models is run after each epoch on validation set.
 
 \subsection{Labels representation evaluation}
+The predicted labels depend often on full history and not only last turn which makes the task very challenging.
+Our informal experiments showed that by optimizing the training only on last turn\footnote{The prediction was conditioned on full history but we back-propagated the error only in words for last turn} degrades the performance significantly by more than 40\%. 
+
+Predicting the labels jointly is quite challenging because the distribution of the labels is skewed as demonstrated in~Figure~\ref{fig:labels}.
+As some of the labels combinations are very rare they occur only in the development and test set so the joint model is not able to predict them.
+We think that such data sparsity of slot triples caused is the root of degraded performance of the joint model.
+\begin{figure}
+\includegraphics[width=0.5\textwidth]{dstc2_goals_joint_log_scale}
+\caption{The histogram of joint labels in the log scale.}
+\label{fig:labels}
+\end{figure}
+
+The model with independent label prediction obtained much better performance on each slot individually as expected\footnote{TODO report results joint vs independent}, but also it surprisingly outperformed the joint model in the joint prediction.
+We think that with larger amount of data the joint model would suffer less from data sparsity and perform better.
+This fact is supported by comparing the performance of joint and independent model on the original Dstc2 dataset where training and test set differs much more than on our resplitted version. 
+See Table~\ref{tab:dstc} and Table~\ref{tab:resplit} for details.
 
 \begin{table}
 \caption{Accuracy on development and {\it Dstc2 test set }}
 \begin{center}
-\begin{tabular}{r@{\quad}rl}
+\begin{tabular}{r@{\quad}rll}
 \hline
 \multicolumn{1}{l}{\rule{0pt}{12pt}
-                   Year}&\multicolumn{2}{l}{World population}\\[2pt]
+                   Model}&\multicolumn{1}{l}{Dev set}&\multicolumn{2}{l}{Test set}\\[2pt]
 \hline\rule{0pt}{12pt}
-8000 B.C.  &     5,000,000& \\
-  50 A.D.  &   200,000,000& \\
-1650 A.D.  &   500,000,000& \\
-1945 A.D.  & 2,300,000,000& \\
-1980 A.D.  & 4,400,000,000& \\[2pt]
+Joint  &     ?&  todo \\
+Indep  &   todo& todo \\
+EncDec &   todo& todo \\
 \hline
 \end{tabular}
 \end{center}
+\label{tab:dstc}
 \end{table}
 
+Since the encoder decoder architecture is much more general it needed to learn firstly to predict only three slot labels in the correct order.
+It turned out that the architecture learned to predict tuples of four with three slot values and end of string (EOS) symbol quickly even before seeing first half of training data in the first epoch.
+At the end of first epoch it made no mistake on predicting slot values in the incorrect order.
 
-\begin{figure}
-\includegraphics[width=0.5\textwidth]{encoder}
-\caption{The RNN encodes the word history into dialog state $h_T$ and predicts slot values independently.}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=0.5\textwidth]{encoder_joint}
-\caption{The joint label predictions using RNN.}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=0.5\textwidth]{encdec}
-\caption{Encoder decoder with attention predicts goals.}
-\end{figure}
+The encoder decoder strongly outperformed previous models and the time needed for learning the output structure was surprisingly short
+because the best model weights were typically found between fifth and eight epoch for all model configurations including encoder-decoder settings.
 
 \subsection{Data preparation experiments}
+As mentioned the data for Dstc2 test set were obtained from another system than the data for validation and training set.\cite{verify and cite dstc2}.
+We wanted to investigate how this influence the complexity of the dataset so we merge all Dstc2 data together and created splits of 80\%, 10\% and 10\% for training, development and test set.
+The results in Table~\ref{ref:resplit} show that tasked complexity significantly dropped.
+
+\begin{table}
+\caption{Accuracy on dev and test set of resplitted Dstc2 data}
+\begin{center}
+\begin{tabular}{r@{\quad}rll}
+\hline
+\multicolumn{1}{l}{\rule{0pt}{12pt}
+                   Model}&\multicolumn{1}{l}{Dev set}&\multicolumn{2}{l}{Test set}\\[2pt]
+\hline\rule{0pt}{12pt}
+Joint  &     ?&  todo \\
+Indep  &   todo& todo \\
+EncDec &   todo& todo \\
+\hline
+\end{tabular}
+\end{center}
+\label{tab:repslit}
+\end{table}
 
 \section{Related work}
 Our system is related to RNN tracker of \cite{Zilka} which reported near state-of-the art result on Dstc2 dataset and was the first incremental system which was able to update the dialog state word-by-word with such accuracy.
 In contrast to work of \cite{Zilka} we use no abstraction of slot values but we add the additional features as described in Section~\ref{todo_model_input_featurs}.
 The first system which used Neural Network for dialog state tracking \cite{henderson} used feed forward network and manually engineered more than ten features across different levels of abstraction of the user input including spoken language understanding component (SLU).
-In our work we focus on simplifying the architecture and so we use only features which are explicitly given by the dialog history word representation and the task database.
+In our work we focus on simplifying the architecture and so we use only features which are explicitly given by the dialog history word representation and the database.
 
 The system of \cite{Word-based dialog state tracking with recurrent neural networks-Henderson} gives state-of-the-art results and like our system it predicts the dialog state from words using a recurrent neural networks.
 On the other hand their system heavily relies on abstracting user input.
 Another dialog state tracker with LSTM was used in reinforcement setting but they also used information from SLU pipeline.\cite{Dialog History Construction with Long-Short Term Memory for Robust Generative Dialog State Tracking}
 
 It is worth noting that there are first attempts to train end-to-end dialog system even without explicitly modelling dialog state\cite{Weston} which simplifies the overall architecture of a dialog system.
-However, the end-to-end model was evaluated only on artificial dataset and cannot be compared to dstc2 dataset directly.
+However, the reported end-to-end model was evaluated only on artificial dataset and cannot be compared to Dstc2 dataset directly.
 
-\section{Conclusion}
+\section{Conclusion and Future work}
+We eval
+
+
+\subsection*{Future work}
+Use standard evaluation metrics on Dstc2 including L2 norm and predict method and requested slots.
+Collect and annotate data so we can evaluate the models on another task oriented dataset.
 
 
 
