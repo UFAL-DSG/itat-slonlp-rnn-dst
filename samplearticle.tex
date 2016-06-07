@@ -117,7 +117,17 @@ feeding data - history prefix, turn by turn
 
 \begin{figure}
 \includegraphics[width=0.5\textwidth]{encoder}
-\caption{The RNN encodes the word history into dialog state $h_T$ and predict slot values independently.}
+\caption{The RNN encodes the word history into dialog state $h_T$ and predicts slot values independently.}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=0.5\textwidth]{encoder_joint}
+\caption{The joint label predictions using RNN.}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=0.5\textwidth]{encdec}
+\caption{Encoder decoder with attention predicts goals.}
 \end{figure}
 
 \subsection{Data preparation experiments}
