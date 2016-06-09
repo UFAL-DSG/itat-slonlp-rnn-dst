@@ -34,7 +34,7 @@ This paper discuss models for dialogue state tracking using recurrent neural net
 We present experiments on standard dialogue state tracking (DST) dataset DSTC2\cite{henderson2014second}.
 On one hand, RNN models became state of the art in DST,
 on the other hand most state-of-the-art models are only turn-based and require preprocessing specific to evaluated dataset (e.g. DSTC2) in order to achieve state-of-the-art results.
-We implemented three architectures which can be used in incremental settings and requires almost no preprocessing.
+We implemented two architectures which can be used in incremental settings and requires almost no preprocessing.
 We compare their performance to the benchmarks on DSTC2 and discuss their properties.
 With only a trivial preprocessing performance of our models is close to the state-of-the-art results.
 \end{abstract}
@@ -71,7 +71,7 @@ Our experiments show that one can obtain better results by splitting the data ra
 As a result, we conclude that DSTC2 might suggest too pessimistic view of the state-of-the-art methods in dialogue state tracking caused by the data distribution mismatch.
 
 Our contribution is three fold. 
-At first, in Section~\ref{sec:model} we compare three different architectures using RNN for dialogue state tracking.
+At first, in Section~\ref{sec:model} we compare two different architectures using RNN for dialogue state tracking.
 Secondly, in~Section~\ref{sec:eval} we describe state-of-the art word-by-word dialogue state trackers architectures and propose a new encoder-decoder architecture for DST task.
 Finally, in~Section~\ref{sec:eval} we show that obtaining excellent results on DSTC2 dataset is very demanding because of the training and test set dissimilarity. In contrast, we obtained much better results just by random resplitting of the DSTC2 data.
 % TODO measure significance and report significant improvement
@@ -82,9 +82,9 @@ Finally, in~Section~\ref{sec:eval} we show that obtaining excellent results on D
 Our models are all based on Recurrent Neural Network encoder\cite{werbos1990backpropagation}. Similarly to RNN encoder\cite{zilka2015incremental}, the models update their hidden states $h_{enc}$ after processing each word.
 The models differ only in the way they predict {\it goal} labels, i.e. $food$, $area$ and $price range$, from the RNN's encoded state.
 
-The first model predicts the triples of slot values $(food, area, price range)$ jointly from the encoder hidden state $h_{enc}$.
-The second model predicts the labels independently by employing three independent classifiers, each predicting either $food$, $area$ or $price range$ based on $h_{enc}$.
-The last model uses a decoder in order to predict values one after each other from the $h_{enc}$. It is an implementation of the encoder-decoder model, which has been successfully used in machine translation\cite{bahdanau2014neural}.
+% The first model predicts the triples of slot values $(food, area, price range)$ jointly from the encoder hidden state $h_{enc}$.
+The first model predicts the labels independently by employing three independent classifiers, each predicting either $food$, $area$ or $price range$ based on $h_{enc}$.
+The second model uses a decoder in order to predict values one after each other from the $h_{enc}$. It is an implementation of the encoder-decoder model, which has been successfully used in machine translation\cite{bahdanau2014neural}.
 
 The RNN encoders take word embedding and several binary features as the input at each step.
 % TODO pridat referenci na word embeddingy
@@ -92,7 +92,7 @@ The binary features for each word are the speaker role, representing either user
 Since DSTC2 database is a simple table with six columns, we introduce six binary features firing if the word is a substring of named entity at given column.
 For example, the word {\it indian} will not only trigger the feature for column $food$ and its value {\it indian} but also for column restaurant $name$ and its value {\it indian heaven}.
 
-All three models were implemented using TensorFlow\cite{abaditensorflow} framework. By introducing more and more complex models, we aim to overcome the data sparsity problem and incorrect independence assumptions.
+Both models were implemented using TensorFlow\cite{abaditensorflow} framework. By introducing more and more complex models, we aim to overcome the data sparsity problem and incorrect independence assumptions.
 
 \subsection{Predicting labels jointly}
 \label{sec:joint}
@@ -107,7 +107,7 @@ However, with increasing number of slots the model suffers from the curse of dim
 
 \subsection{Predicting labels independently}
 \label{sec:indep}
-Independent slots prediction using one classifier per each slot is also very easy to implement.
+Independent slots prediction using one classifier per each slot is also straightforward to implement.
 It does not suffer from the curse of dimensionality but it introduce unrealistic assumption of uncorrelated slot properties.
 In case of DSTC2 and Cambridge restaurant domain, it is hard to believe that e.g. slots $area$ and $price range$ do not correlate.
 % \PB{neni 'hard' moc informal? mozna 'difficult'?}\VH{nebo proste: it's unlikely that..}  ja mam docela rad neformalni vyrazy. Necham to tak. Muzem v camera ready prodiskutovat
@@ -124,7 +124,7 @@ To our knowledge, we are first who used this model for the task of slot predicti
 The model is typically used in machine translation, since it's  able to handle longer sequences with good accuracy and it captures correlation between the decoded slots easily\cite{bahdanau2014neural}. %\PB{kolik? nebo reference?} -> reference je Bahdanau na konci vety
 
 The disadvantage of this model is its complexity.
-Firstly, the model is not straightforward to implement\footnote{We modified code from TensorFlow `seq2seq` module.}. Secondly, the decoding time is quadratic in length of the decoded tuples.
+Firstly, the model is not trivial to implement\footnote{We modified code from TensorFlow `seq2seq` module.}. Secondly, the decoding time is quadratic in length of the decoded tuples.
 However, it is trivial to encode dialogue state tracking as sequence-to-sequence problem. Given the the dialogue history as the input sequence, we trained the model to predict always four labels which represent the first, the second, the third slot and the~end-of-string symbol.
 Since our target sequence is always of length four, the model does not suffer from long decoding time. 
 %\PB{In contrast, the decoding consumes asymptotically constant time regardless the input.}  to mi prijde zbytecny, to ocekavas.
@@ -163,7 +163,7 @@ Our informal experiments showed that optimizing the training only on the last tu
 
 Predicting the labels jointly is quite challenging because the distribution of the labels is skewed as demonstrated in~Figure~\ref{fig:labels}.
 As some of the labels combinations are very rare, they occur only in the development and test set so the joint model is not able to predict them.
-We argue that such data sparsity of slot triples causes the degraded performance of the joint model.
+During first informal experiments the model performed poorly arguably due to data sparsity of slot triples and we do not focus in further evaluation.
 
 \begin{figure}
 \includegraphics[width=0.5\textwidth]{dstc2_goals_joint_log_scale}
@@ -171,10 +171,13 @@ We argue that such data sparsity of slot triples causes the degraded performance
 \label{fig:labels}
 \end{figure}
 
-The model with independent label prediction obtained much better performance on each slot individually as expected, but also it surprisingly outperformed the joint model in the joint prediction.
-We hypothesize that with larger amount of data the joint model would suffer less from data sparsity and perform better.
-This claim is supported by comparison of joint and independent models performance on the original DSTC2 dataset.
-In this dataset, the training and test set differ much more than on our resplitted version (see Table~\ref{tab:dstc} and Table~\ref{tab:resplit} for details).
+% The model with independent label prediction obtained much better performance on each slot individually as expected, but also it surprisingly outperformed the joint model in the joint prediction.
+% We hypothesize that with larger amount of data the joint model would suffer less from data sparsity and perform better.
+% This claim is supported by comparison of joint and independent models performance on the original DSTC2 dataset.
+The model with independent label prediction is a strong baseline which was used among others in work of~\cite{zilka2015incremental}.
+The model sufferers less from from data mismatch because it does not model correlation between predicted labels.
+This property can explain smaller performance dropped between the test set from reshuffled data and the official test set in comparison to encoder-decoder model.
+In the official DSTC2 dataset, the training and test set differ much more than on our resplitted version (see Table~\ref{tab:dstc} and Table~\ref{tab:resplit} for details).
 
 \begin{table}
 \caption{Accuracy on development and test set}
@@ -247,7 +250,7 @@ The system is the best performing system on live SLU input which is the main dif
 \section{Conclusion}
 \label{sec:conc}
 
-We presented three dialogue state tracking models which represent the state-of-the-art architectures using recurrent neural networks and compared them with each other.
+We presented two dialogue state tracking models which represent the state-of-the-art architectures using recurrent neural networks and compared them with each other.
 To our knowledge, we are the first who used encoder-decoder model for the dialogue state tracking task, and we encourage others to do so, because it outperformed other standard RNN models.
 We also observed that obtaining high accuracy for dialogue state tracking on DSTC2 test set is notoriously hard and that the task become substantially easier if the data is reshuffled.
 
