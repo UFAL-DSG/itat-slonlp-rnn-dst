@@ -141,7 +141,8 @@ Since our target sequence is always of length four, the model does not suffer fr
 We report results on the standard split where we used 516 dialogues as a validation set for early stopping\cite{prechelt1998early} and 90\% for training. The joint slot accuracy is predicted from ASR transcription only.
 For the results on the standard split of DSTC2 see see~Table~\ref{tab:dstc}.
 We also evaluated the models randomly splitted DSTC2 dataset and the details are described in~Subsection\ref{sec:split}.
-Note that we measure accuracy with schedule 2 with using the official evaluation scripts in all our experiments.
+% Note that we measure accuracy with schedule 2 with using the official evaluation scripts in our experiments.
+Note that we measure accuracy without schedule 2 and we are not using the official evaluation scripts in our experiments.
 
 % \todo{nechceme reportovat i train a valid? me to vetsinou v clancich zajima} muzem kdyz to stihnem, ale validace na trenovani trva dlouho a nechce se mi to prepocitavat na validacni sade to mame
 
@@ -254,17 +255,18 @@ We presented two dialogue state tracking models which represent the state-of-the
 To our knowledge, we are the first who used encoder-decoder model for the dialogue state tracking task, and we encourage others to do so, because it outperformed other standard RNN models.
 We also observed that obtaining high accuracy for dialogue state tracking on DSTC2 test set is notoriously hard and that the task become substantially easier if the data is reshuffled.
 
-The code is published under permissive Apache license at Github \url{https://github.com/oplatek/e2end/}. \footnote{Some informal experiments were conducted using during summer semester of the Statistical Dialogue System class and can be also found on Github: https://github.com/oplatek/sds-tracker}
+The code is published under permissive Apache license at Github \url{https://github.com/oplatek/e2end/}.\footnote{Some informal experiments were conducted using during summer semester of the Statistical Dialogue System class and can be also found on Github: https://github.com/oplatek/sds-tracker}
 \subsection*{Future work}
-Among our first next steps will be im
+We plan to evaluate the models using the standard DSTC2 scripts so we can measure accuracy with schedule 2.
 We also plan to predict all slots tracked in the DSTC2 dataset.
-Another direction of our future work will focus on collecting and annotating more data which would allow us to evaluate the models on another task-oriented dataset.
+In addition, we would like to investigate how much the introduced database features per word improved the performance of the models.
+Our future plans also concern collecting and annotating more data which would allow us to evaluate the models on another task-oriented dataset.
 
 \subsection*{Acknowledgment}
 We would like to thank Mirek Vodolán for help with evaluation scripts.
 This research was partly funded by the Ministry of Education, Youth and Sports of the Czech Republic under the grant agreement LK11221, core research funding, grant GAUK 1915/2015, and also partially supported by SVV project number 260 224. 
 We gratefully acknowledge the support of NVIDIA Corporation with the donation of the Tesla K40c GPU used for this research.
-Cloud computational resources were provided by the MetaCentrum under the program LM2010005 and the CERIT-SC under the program Centre CERIT Scientific Cloud, part of the Operational Program Research and Development for Innovations, Reg. no. CZ.1.05/3.2.00/08.0144.
+Cloud computational resources were provided by the MetaCentrum under the program LM2010005 and the CERIT-SC under the program Centre CERIT Scientific Cloud, part of the Operational Program Research and Development for Innovations, Reg.\ no. CZ.1.05/3.2.00/08.0144.
 % TODO myslim, ze to mam dobre, ale v camera ready to zkontrolujem - nestiham. \PB{nemusi byt podekovani metacentru v nejake jejich oficialni podobe - link v komentari?} %https://wiki.metacentrum.cz/wiki/Pravidla_vyu%C5%BEit%C3%AD_MetaVO/Pod%C4%9Bkov%C3%A1n%C3%AD
 
 \bibliographystyle{plain}
