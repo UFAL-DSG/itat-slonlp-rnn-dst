@@ -108,13 +108,14 @@ Our model variants differ only in the way they predict {\it goal} labels, i.e. $
 % The first model predicts the triples of slot values $(food, area, price range)$ jointly from the encoder hidden state $h_{enc}$.
 The first model predicts the output slot labels independently by employing three independent classifiers (see Section~\ref{sec:indep})
 The second model uses a decoder in order to predict values one after each other from the $h_{enc}$ (see Section~\ref{sec:encdec}).
-We also experimented with single classifier which predicts the labels jointly (see Figure~\ref{fig:encjoint}, but it suffers from data sparsity of the predicted tuples, so we focused only on the independent label prediction and encoder-decoder models.
+% We also experimented with single classifier which predicts the labels jointly (see Figure~\ref{fig_encjoint}, but it suffers from data sparsity of the predicted tuples, so we focused only on the independent label prediction and encoder-decoder models.
+We also experimented with single classifier which predicts the labels jointly (see Figure~1, but it suffers from data sparsity of the predicted tuples, so we focused only on the independent label prediction and encoder-decoder models.
 
 Both models were implemented using TensorFlow~\cite{abaditensorflow} framework. By introducing more and more complex models, we aim to overcome the data sparsity problem and incorrect independence assumptions.
 
 % \subsection{Predicting labels jointly}
 % \label{sec:joint}
-% The Joint model uses a single classifier to predict a tuple of slots (see Figure~\ref{fig:encjoint}).
+% The Joint model uses a single classifier to predict a tuple of slots (see Figure~\ref{fig_encjoint}).
 % The model is easy to implement and it optimizes directly the evaluation metric\OD{(see sekce s evaluací?)} \ODdel{of predicting the labels jointly.}
 % However, with \OD{an} increasing number of slots\OD{,} the model suffers from the curse of dimensionality and therefore\OD{,} it is not convenient for small datasets.\OD{tohle bych asi nějak rozvedl, nebo fakt vyhodil}
 \begin{figure}
@@ -124,7 +125,7 @@ Both models were implemented using TensorFlow~\cite{abaditensorflow} framework. 
 \caption{The joint label predictions using RNN from last hidden state $h_T$. The $h_T$ represents the whole dialog history of $T$ words. The RNN takes as input for each word $i$ an embedding and binary features concatenated to~vector~$X_{i}$.}
 \end{center}
 \vspace{-0.70em}
-\label{fig:encjoint}
+\label{fig_encjoint}
 \end{figure}
 
 \subsection{Independent classifiers for each label}
@@ -133,7 +134,6 @@ The independent model predicts slots $food$, $area$ or $price range$ based on $h
 Independent slots prediction using one classifier per each slot is also straightforward to implement.  % proc \OD{are} ??!!
 This model introduces an unrealistic assumption of uncorrelated slot properties.
 In case of DSTC2 and the Cambridge restaurant domain, it is hard to believe that, e.g., the slots $area$ and $price range$ are not correlated.
-, but does not suffer of curse of dimensionality like the joint model
 
 \begin{figure}
 \begin{center}
