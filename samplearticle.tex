@@ -59,7 +59,7 @@ Dialogue state tracking translates ambiguous natural language into a formal lang
 In our experiments, we predict the dialogue state only from ASR transcriptions of the conversation history and a word feature which fires if a word may be a property from the database.
 We argue that using only database values instead of the full ontology is not only simpler but also more natural because the system can inform the users only about the values in the database.
 Note that a database of information e.g., about Cambridge restaurants, naturally defines the task of the conversation by listing the information which the system can provide.
-On the other hand, the ontology of the domain needs to be handcrafted because it defines the task by listing all the information which users can ask about.
+On the other hand, the domain ontology needs to be handcrafted because it defines the task by listing all the information which users can ask about.
 % TODO In addition, we show in Section~\ref{sec:eval} that we achieve strong performance.\OD{Tahle věta tady trochu vlaje ve větru, nešlo by ji nějak víc propojit s předch. textem?}
 
 In our experiments, we focus only on the {\it goal} slot predictions because the other groups are trivial to predict\footnote{The slots {\it Requested} and {\it Method} have accuracies 0.95 and 0.95 on the test set according to the state-of-the-art~\cite{williams2014web}.}.
@@ -82,7 +82,7 @@ Dialogue state tracking is task which updates distribution of representation of 
 In the DSTC2 dataset, the history is captured by dialogue act items and their probabilities.
 A Dialogue act item is a triple of the following form $(actionType, slotName, slotValue)$.
 
-The DSTC2 is a standard dataset for DST, and most of state-of-the-art systems in DST have reported their performance this dataset~\cite{henderson2014second}. 
+The DSTC2 is a standard dataset for DST, and most of state-of-the-art systems in DST have reported their performance on~this dataset~\cite{henderson2014second}. 
 The full dataset is freely available since January 2014 and contains 1612 dialogues in the training set, 506 dialogues in the development set and 1117 dialogues in the test set.
 The conversations are annotated at the turn level where the hidden information state was annotated manually in form of $(actionType, slotName, slotValue)$ according to the domain ontology.
 The task of the domain is defined by a~database of restaurants and their properties\footnote{There are six columns in the database: name, food, price\_range, area, telephone, address.}.
@@ -91,7 +91,7 @@ The~manually designed ontology which captures a~restaurant domain is also distri
 \section{Models}
 \label{sec:model}
 
-Our models are all based on a recurrent neural network (RNN) encoder~\cite{werbos1990backpropagation}. Similarly to RNN encoder of~\cite{zilka2015incremental}, the models update their hidden states $h_{enc}$ after processing each word. The RNN encoder takes as inputs the previous state $h_{t-1}$ representing history for first $t-1$ words and features $X_t$ for the current word $w_t$. It outputs state $h_t$ representing the whole history up to current word.
+Our models are all based on a recurrent neural network (RNN) encoder~\cite{werbos1990backpropagation}. Similarly to RNN encoder of~\cite{zilka2015incremental}, the models update their hidden states $h$ after processing each word. The RNN encoder takes as inputs the previous state $h_{t-1}$ representing history for first $t-1$ words and features $X_t$ for the current word $w_t$. It outputs state $h_t$ representing the whole history up to current word.
 We uses a~GRU cell~\cite{cho2014gru} as the update function and we learn its parameters during training.
 
 For each input token, our RNN encoder reads the word embedding~\cite{bengio2003neural} of this token along with several binary features. 
@@ -105,13 +105,13 @@ Since DSTC2 database is a simple table with six columns, we introduce six binary
 For example, the word {\it indian} will not only trigger the feature for column $food$ and its value {\it indian} but also for column restaurant $name$ and its value {\it indian heaven}.
 
 Our model variants differ only in the way they predict {\it goal} labels, i.e. $food$, $area$ and $price range$, from the RNN's last encoded state.
-% The first model predicts the triples of slot values $(food, area, price range)$ jointly from the encoder hidden state $h_{enc}$.
+% The first model predicts the triples of slot values $(food, area, price range)$ jointly from the encoder hidden state $h$.
 The first model predicts the output slot labels independently by employing three independent classifiers (see Section~\ref{sec:indep})
-The second model uses a decoder in order to predict values one after each other from the $h_{enc}$ (see Section~\ref{sec:encdec}).
+The second model uses a decoder in order to predict values one after each other from the $h_{T}$ (see Section~\ref{sec:encdec}).
 % We also experimented with single classifier which predicts the labels jointly (see Figure~\ref{fig_encjoint}, but it suffers from data sparsity of the predicted tuples, so we focused only on the independent label prediction and encoder-decoder models.
 We also experimented with single classifier which predicts the labels jointly (see Figure~1, but it suffers from data sparsity of the predicted tuples, so we focused only on the independent label prediction and encoder-decoder models.
 
-Both models were implemented using TensorFlow~\cite{abaditensorflow} framework. By introducing more and more complex models, we aim to overcome the data sparsity problem and incorrect independence assumptions.
+The models were implemented using TensorFlow~\cite{abaditensorflow} framework. By introducing more and more complex models, we aim to overcome the data sparsity problem and incorrect independence assumptions.
 
 % \subsection{Predicting labels jointly}
 % \label{sec:joint}
@@ -130,9 +130,9 @@ Both models were implemented using TensorFlow~\cite{abaditensorflow} framework. 
 
 \subsection{Independent classifiers for each label}
 \label{sec:indep}
-The independent model predicts slots $food$, $area$ or $price range$ based on $h_{enc}$ independently using three classifiers.
-Independent slots prediction using one classifier per each slot is also straightforward to implement.  % proc \OD{are} ??!!
-This model introduces an unrealistic assumption of uncorrelated slot properties.
+The independent model predicts slots $food$, $area$ and $price range$ based on the last hidden state $h_{T}$ independently using three classifiers.
+ % proc \OD{are} ??!!
+Independent slots prediction using one classifier per each slot is straightforward to implement, but the model introduces an unrealistic assumption of uncorrelated slot properties.
 In case of DSTC2 and the Cambridge restaurant domain, it is hard to believe that, e.g., the slots $area$ and $price range$ are not correlated.
 
 \begin{figure}
@@ -202,7 +202,7 @@ In informal experiments, we tried to speed-up the training by  optimizing the pa
 Predicting the labels jointly is quite challenging because the distribution of the labels is skewed as demonstrated in~Figure~\ref{fig:labels}.
 % TODO novej obrazek\OD{mně z toho obrázku moc skewed nepřijde, obrázek vypadá celkem rovnoměrně, i když si nejsem jistej, co zobrazuje -- co je na tom skewed?}
 Some of the labels combinations are very rare, and they occur only in the development and test set so the joint model is not able to predict them.
-During first informal experiments the model performed poorly arguably due to data sparsity of slot triples and we do not focus in further evaluation.
+During first informal experiments the~joint model performed poorly arguably due to data sparsity of slot triples. We further focus on model with independent classifiers and encoder-decoder architecture.
 
 \begin{figure}
 \includegraphics[width=0.5\textwidth]{jointLabelsDistrib}
@@ -214,7 +214,7 @@ During first informal experiments the model performed poorly arguably due to dat
 % We hypothesize that with larger amount of data the joint model would suffer less from data sparsity and perform better.
 % This claim is supported by comparison of joint and independent models performance on the original DSTC2 dataset.
 The model with independent label prediction is a strong baseline which was used, among others, in work of~\cite{zilka2015incremental}.
-The model suffers less from from data mismatch because it does not model the correlation between predicted labels.
+The model suffers less from data set mismatch because it does not model the correlation between predicted labels.
 This property can explain a smaller performance drop between the test set from reshuffled data and the official test set in comparison to encoder-decoder model.
 
 % FIXME include results from other papers
@@ -240,7 +240,7 @@ EncDec &   0.94 & 0.73 \\
 
 
 Since the encoder-decoder architecture is very general and can predict arbitrary output sequences, it also needs to learn how to predict only three slot labels in the correct order.
-It turned out that the architecture learned to predict quadruples” with three slot values and the end-of-string (EOS) symbol quickly, even before seeing the first half of the training data in the first epoch.
+It turned out that the architecture learned to predict quadruples with three slot values and the end-of-string (EOS) symbol quickly, even before seeing a~half of the training data in the first epoch.
 At the end of the first epoch, the system made no more mistakes on predicting slot values in the incorrect order.
 The encoder-decoder system 
 % TODOstrongly\OD{significance tests?/nebo: outperformed the prev. models by a wide margin?}
@@ -279,8 +279,7 @@ The~results in Table~2 show that the complexity of the task dropped significantl
 \section{Related work}
 \label{sec:related}
 
-There numerous systems which reported on the DSTC2 dataset, we discuss only the systems which use RNN.
-In general, the RNN systems achieved excellent results.
+There are numerous systems which reported on the DSTC2 dataset, we discuss only the systems which use RNN. In general, the RNN systems achieved excellent results.
 
 Our system is related to the RNN tracker of Žilka and Jurčíček~\cite{zilka2015incremental},
 which reported near state-of-the art results on the~DSTC2 dataset and was the first incremental system which was able to update the dialogue state word-by-word with such accuracy.
@@ -304,8 +303,8 @@ However, the reported end-to-end model was evaluated only on artificial dataset 
 \label{sec:conc}
 
 We presented and compared two dialogue state tracking models which are based on state-of-the-art architectures using recurrent neural networks.
-To our knowledge, we are the first to use an encoder-decoder model for the dialogue state tracking task, and we encourage others to do so because it outperformed a standard RNN model. 
-Note that the standard RNN model achieves almost state-of-the-art results as well.
+To our knowledge, we are the first to use an encoder-decoder model for the dialogue state tracking task, and we encourage others to do so because it is competative with the standard RNN model. 
+Note that the standard RNN model achieves almost state-of-the-art results.
 
 We evaluated the models on DSTC2 dataset containing task-oriented dialogues in restaurant domain. 
 We trained the models using only ASR 1-best transcriptions and task-specific lexical features defined by the task database.
