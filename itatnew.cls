@@ -36,7 +36,6 @@
 \RequirePackage{listings}
 \RequirePackage{latexsym}
 \RequirePackage{amsthm}
-\RequirePackage{svg}
 
 \setlength{\textheight}{24cm}
 \setlength{\topmargin}{-0.85cm}
