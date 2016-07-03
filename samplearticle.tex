@@ -31,14 +31,31 @@
 
 \maketitle              % typeset the title of the contribution
 
-% \OP{Kde vidite problem se zalamovanim slov} \PB{predict-ing, unreal-istic, individu-ally} vec TeX nechame default
+%% REVIEWERS comments %%%%%%%%
+\OP{not standard metric and comparison to other systems} \\
+\OP{reference na dstc2 - todo provide link to footnote} \\
+\OP{Predstavit DST co to je - summarizing dialogue history in formal state} \\
+\OP{Opravit vetu "A dialogue state tracker summarizes the hidden information state (HIS)\cite{young2010hidden} of a user's goal from the conversation history." - reviewer alergicky na ni} \\
+% \OP{jak pouzivane rnn} - DONE \\
+\OP{sekce 3 zacina bez uvodu do modelu} \\
+% \OP{vysvetlit zkratky ASR a GRU} - DONE \\
+% \OP{kde jsem vzal database} - DONE \\
+% \OP{whe seq2seq generates 3 labels + EOS} - DONE \\
+% \OP{why not ASR n-best list} \\
+\OP{why not slots name - is it standard recommended metric - do not think so} \\
+\OP{no incremental -true but no validation set} \\
+%% End of REVIEWERS comments %%%%%%%%
 
+%%%% MY TODO %%%%
+% \TODO{nechceme reportovat i train a valid? me to vetsinou v clancich zajima} muzem kdyz to stihnem, ale validace na trenovani trva dlouho a nechce se mi to prepocitavat na validacni sade to mame
+\OP{jak dlouho trvala epocha - proc je tak pomala?}
+\OP{myslim, ze to mam dobre, ale v camera ready to zkontrolujem - nestiham. \PB{nemusi byt podekovani metacentru v nejake jejich oficialni podobe - link v komentari?} \url{https://wiki.metacentrum.cz/wiki/Pravidla-BLABLA}}
+%%% END OF MY TODO %%%
 
-%\OP{Zitra se zeptam na emaily a zda je tam nutne mit webovku. Je povinne udat jednoho korespondencniho autora. Jelikoz z cviceni se do vysledku nedostal ani jeden model udal jsem tam sebe.} \PB{jasne, s tim neni problem, jenom abychom vedeli jak to je :) pripadne by nam mohl ufal udelat mailovky a pak mit adresu ve tvaru \{jeden, druhy, treti, ..\}@ufal.cuni.cz}\\ emaily na ufalu nedostanete - to je takovej porod - jeste vetsi nez ten clanek:)
 
 \begin{abstract}
 This paper discusses models for dialogue state tracking using recurrent neural networks (RNN).
-We present experiments on the standard dialogue state tracking (DST) dataset, DSTC2~\cite{henderson2014second}.
+    We present experiments on the standard dialogue state tracking (DST) dataset, DSTC2~\cite{henderson2014second}.
 On the one hand, RNN models became state of the art in DST,
 on the other hand, most state-of-the-art models are only turn-based and require dataset-specific preprocessing (e.g. DSTC2-specific) in order to achieve state-of-the-art results.
 We implemented two architectures which can be used in incremental settings and require almost no preprocessing.
@@ -55,12 +72,10 @@ It was shown that with a better dialogue state tracking of HIS, conversation age
 Dialogue state tracking translates ambiguous natural language into a formal language convenient for reasoning and accessing external knowledge. Reasoning as well as the use of external knowledge are crucial to a successful conversation in a task oriented dialogue.
 
 
-
-In our experiments, we predict the dialogue state only from ASR transcriptions of the conversation history and a word feature which fires if a word may be a property from the database.
+In our experiments, we predict the dialogue state only from Automatic Speech Recognition (ASR) transcriptions of the conversation history and a word feature which fires if a word may be a property from the database.
 We argue that using only database values instead of the full ontology is not only simpler but also more natural because the system can inform the users only about the values in the database.
-Note that a database of information e.g., about Cambridge restaurants, naturally defines the task of the conversation by listing the information which the system can provide.
+Note that a database of information e.g., about Cambridge restaurants, naturally defines the domain of the conversation by listing the information which the system can provide.
 On the other hand, the domain ontology needs to be handcrafted because it defines the task by listing all the information which users can ask about.
-% TODO In addition, we show in Section~\ref{sec:eval} that we achieve strong performance.\OD{Tahle věta tady trochu vlaje ve větru, nešlo by ji nějak víc propojit s předch. textem?}
 
 In our experiments, we focus only on the {\it goal} slot predictions because the other groups are trivial to predict\footnote{The slots {\it Requested} and {\it Method} have accuracies 0.95 and 0.95 on the test set according to the state-of-the-art~\cite{williams2014web}.}.
 
@@ -73,9 +88,7 @@ As a result, we conclude that DSTC2 might suggest too pessimistic view of the st
 Our contribution is threefold. 
 First, in Section~\ref{sec:model} we compare two different architectures using RNN for dialogue state tracking.
 Secondly, in~Section~\ref{sec:eval} we describe state-of-the art word-by-word dialogue state trackers architectures and propose a new encoder-decoder architecture for the DST task.
-Finally, in~Section~\ref{sec:eval} we show that obtaining excellent results on DSTC2 dataset is very demanding because of the training and test set dissimilarity. In contrast, we obtained much better results just by re-splitting the DSTC2 data randomly.
-% TODO consider \OD{Tenhle odstavec mi přijde jako víc high-level popis toho, co děláte, možná bych ho dal před ty konkrétnější popisky (a sem jen nějaký ten obyč rozcestník)?}
-% TODO measure significance and report significant improvement
+Finally, in~Section~\ref{sec:eval} we show that obtaining excellent results on DSTC2 dataset is very demanding because of the training and test set dissimilarity.
 
 \section{Dialogue state tracking on DSTC2 dataset}
 Dialogue state tracking is task which updates distribution of representation of dialogue history.
@@ -83,16 +96,16 @@ In the DSTC2 dataset, the history is captured by dialogue act items and their pr
 A Dialogue act item is a triple of the following form $(actionType, slotName, slotValue)$.
 
 The DSTC2 is a standard dataset for DST, and most of state-of-the-art systems in DST have reported their performance on~this dataset~\cite{henderson2014second}. 
-The full dataset is freely available since January 2014 and contains 1612 dialogues in the training set, 506 dialogues in the development set and 1117 dialogues in the test set.
+The full dataset is freely available since January 2014 and contains 1612 dialogues in the training set, 506 dialogues in the development set and 1117 dialogues in the test set.\footnote{Available online at~\url{TODO}}
 The conversations are annotated at the turn level where the hidden information state was annotated manually in form of $(actionType, slotName, slotValue)$ according to the domain ontology.
 The task of the domain is defined by a~database of restaurants and their properties\footnote{There are six columns in the database: name, food, price\_range, area, telephone, address.}.
-The~manually designed ontology which captures a~restaurant domain is also distributed with the dataset.
+The~database and a~manually designed ontology which captures a~restaurant domain is also distributed with the dataset.
 
 \section{Models}
 \label{sec:model}
 
-Our models are all based on a recurrent neural network (RNN) encoder~\cite{werbos1990backpropagation}. Similarly to RNN encoder of~\cite{zilka2015incremental}, the models update their hidden states $h$ after processing each word. The RNN encoder takes as inputs the previous state $h_{t-1}$ representing history for first $t-1$ words and features $X_t$ for the current word $w_t$. It outputs state $h_t$ representing the whole history up to current word.
-We uses a~GRU cell~\cite{cho2014gru} as the update function and we learn its parameters during training.
+Our models are all based on a recurrent neural network (RNN) encoder~\cite{werbos1990backpropagation}. Similarly to RNN encoder of~\cite{zilka2015incremental}, the models update their hidden states $h$ after processing each word. The RNN encoder takes as inputs the previous state $h_{t-1}$ representing history for first $t-1$ words and features $X_t$ for the current word $w_t$. It outputs state $h_t$ representing the whole dialogue history up to current word.
+We uses a~Gated Recurrent Unit (GRU) cell~\cite{cho2014gru} as the update function instead of simple RNN cell because it does not suffer from vanishing gradient~\cite{TODO_vanishing_gradient}. We learn its parameters during training.
 
 For each input token, our RNN encoder reads the word embedding~\cite{bengio2003neural} of this token along with several binary features. 
 The binary features for each word are:
@@ -149,14 +162,21 @@ In case of DSTC2 and the Cambridge restaurant domain, it is hard to believe that
 \label{sec:encdec}
 The encoder-decoder model with attention~\cite{bahdanau2014neural} is the most sophisticated model that we used for slot predictions.
 To our knowledge, we are first who used this model for the task of slot predictions.
-% TODO reduce space elsewhere \OD{a tady by mělo následovat povídání o tom, že vezme ten stav a token po tokenu generuje výstup USED for sequence-to-sequence problems}
 The model is successfully used in machine translation where it is able to handle long sequences with good accuracy.
 In DST, it captures correlation between the decoded slots easily~\cite{bahdanau2014neural}. 
 
+We use the encoder RNN cell captures the history of a dialogue which is represented as a~sequence of words from user and system.
+The words are fed to the encoder as they appear in dialogue turn by turn where user and system responses switch regularly.
+The encoder updates its internal state $h_T$ after each word.
+The RNN decoder model is used when the system needs to generate its output, in our case it is at the end of the user response.
+The decoder generates arbitrary length sequence of words takes given the encoded state $h_T$ step by step.
+In each step, an output word and a~new hidden state $h_{T+1}$ is generated.
+The generation process is finished when a special token End of Sequence (EOS) is generated.
+The attention part of model is used at decoding time for weighting the importance of the history. 
+
 The disadvantage of this model is its complexity.
-Firstly, the model is not trivial to implement\footnote{We modified code from the TensorFlow `seq2seq` module.}. Secondly, the decoding time is quadratic in the length of the decoded sequences.
-However, it is trivial to cast DST as a sequence-to-sequence problem. Given the dialogue history as the input sequence, we trained the model to predict a sequence of four tokens representing the first, the second, the third slot and the~end-of-string symbol.
-Since our target sequence is always of length four, the model does not suffer from long decoding time. 
+Firstly, the model is not trivial to implement\footnote{We modified code from the TensorFlow `seq2seq` module.}. 
+Secondly, the decoding time is quadratic in the length of the decoded sequences, but our target sequences are only four tokens long.
 %\PB{In contrast, the decoding consumes asymptotically constant time regardless the input.}  to mi prijde zbytecny, to ocekavas.
 \begin{figure}
 \includegraphics[width=0.5\textwidth]{encdec}
@@ -176,17 +196,14 @@ We also evaluated the models on a randomly split DSTC2 dataset\, and the details
 % Note that we measure accuracy with schedule 2 which skips the first turns where the believe tracker does not track any values. We use the official evaluation scripts in our experiments.
 Note that we measure accuracy without schedule 2 which skips the first turns where the believe tracker does not track any values. As a consequence, we do not evaluate the models according any  standard metric.\footnote{We plan to submit the camera ready version of this article with results evaluated using the standard scripts for measuring accuracy with schedule 2.}
 
-% \TODO{nechceme reportovat i train a valid? me to vetsinou v clancich zajima} muzem kdyz to stihnem, ale validace na trenovani trva dlouho a nechce se mi to prepocitavat na validacni sade to mame
 
 For all our experiments, we train word embeddings of size 100 and use the encoder state size of size 100, together with a dropout keep probability of $0.7$ for both encoder inputs and outputs.
 These parameters where selected by a grid search over the hyper-parameters on development data.
 
 \subsection{Training}
 \label{sec:train}
-% TODO describe vocabularies and shared embeddings for encoder-decoder
 The training procedure minimizes the cross-entropy loss function using the Adam optimizer~\cite{kingma2014adam} with a batch size of 10.
 We train predicting goal slot values for each turn.
-%An iteration which process turn $t$ uses the the whole dialogue history until the turn $t$ as an input and slot labels $labels_t$ as a reference.
 We treat each dialogue turn as a separate training example, feeding the whole dialogue history up to the current turn into the encoder and predicting the slot labels for the current turn.
 
 We use early stopping with patience~\cite{prechelt1998early}, validating on the development set after each epoch and stopping if the three top models does not change for four epochs.
@@ -200,7 +217,6 @@ In informal experiments, we tried to speed-up the training by  optimizing the pa
 \label{sec:eval}
 
 Predicting the labels jointly is quite challenging because the distribution of the labels is skewed as demonstrated in~Figure~\ref{fig:labels}.
-% TODO novej obrazek\OD{mně z toho obrázku moc skewed nepřijde, obrázek vypadá celkem rovnoměrně, i když si nejsem jistej, co zobrazuje -- co je na tom skewed?}
 Some of the labels combinations are very rare, and they occur only in the development and test set so the joint model is not able to predict them.
 During first informal experiments the~joint model performed poorly arguably due to data sparsity of slot triples. We further focus on model with independent classifiers and encoder-decoder architecture.
 
@@ -240,12 +256,11 @@ EncDec &   0.94 & 0.73 \\
 
 
 Since the encoder-decoder architecture is very general and can predict arbitrary output sequences, it also needs to learn how to predict only three slot labels in the correct order.
-It turned out that the architecture learned to predict quadruples with three slot values and the end-of-string (EOS) symbol quickly, even before seeing a~half of the training data in the first epoch.
+It turned out that the architecture learned to predict quadruples with three slot values and the EOS symbol quickly, even before seeing a~half of the training data in the first epoch.\footnote{We could have modified the decoder to always predict three symbols for our three slots, but our experiments showed that the encoder-decoder architecture does not make mistakes at predicting the order of the three slots and EOS symbol.}  
 At the end of the first epoch, the system made no more mistakes on predicting slot values in the incorrect order.
 The encoder-decoder system 
 % TODOstrongly\OD{significance tests?/nebo: outperformed the prev. models by a wide margin?}
 outperformed the previous models and the time needed for learning the output structure was surprisingly short.\footnote{The best model weights were found after 18 to 23 epochs for all model architectures.}
-% TODO jak dlouho trvala epocha
 
 
 \subsection{Data preparation experiments}
@@ -312,10 +327,10 @@ We trained the models using only ASR 1-best transcriptions and task-specific lex
 
 We also observed that obtaining high accuracy for dialogue state tracking on DSTC2 test set is notoriously hard and that the task becomes substantially easier if the data is reshuffled.
 
-The code for our experiments is published under a permissive Apache license on Github at \url{https://github.com/oplatek/e2end/}.\footnote{Some informal experiments were conducted  within the Statistical Dialogue Systems course at Charles University in Prague and can also be  found on Github at \url{https://github.com/oplatek/sds-tracker}.}
+The code is published under a permissive Apache license.\footnote{The presented experiments are published \url{https://github.com/oplatek/e2end/}. Additional, informal experiments were conducted during the Statistical Dialogue Systems course at Charles University (see \url{https://github.com/oplatek/sds-tracker}).}
 
-In future work, we plan to evaluate the models using the standard DSTC2 scripts to compare them to other trackes on this dataset.
-In addition, we would like to investigate how much the introduced database features improved the performance of the models.
+In future work, we plan to evaluate the models using the standard DSTC2 scripts to compare them to other trackers on this dataset.
+We would like to investigate how much the introduced database features improved the performance of the models, and evaluate our models using ASR n-best list.
 Our future plans also concern collecting and annotating more data which would allow us to evaluate the models on another task-oriented dataset.
 
 \subsection*{Acknowledgment}
@@ -323,7 +338,6 @@ We would like to thank Mirek Vodolán for help with evaluation scripts and Ondř
 This research was partly funded by the Ministry of Education, Youth and Sports of the Czech Republic under the grant agreement LK11221, core research funding, grant GAUK 1915/2015, and also partially supported by SVV project number 260 333. 
 We gratefully acknowledge the support of NVIDIA Corporation with the donation of the Tesla K40c GPU used for this research.
 Cloud computational resources were provided by the MetaCentrum under the program LM2010005 and the CERIT-SC under the program Centre CERIT Scientific Cloud, part of the Operational Program Research and Development for Innovations, Reg.\ no. CZ.1.05/3.2.00/08.0144.
-% TODO myslim, ze to mam dobre, ale v camera ready to zkontrolujem - nestiham. \PB{nemusi byt podekovani metacentru v nejake jejich oficialni podobe - link v komentari?} %https://wiki.metacentrum.cz/wiki/Pravidla_vyu%C5%BEit%C3%AD_MetaVO/Pod%C4%9Bkov%C3%A1n%C3%AD
 
 \newpage
 \bibliographystyle{plain}
