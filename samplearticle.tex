@@ -64,12 +64,16 @@
 
 \begin{abstract}
 This paper discusses models for dialogue state tracking using recurrent neural networks (RNN).
-    We present experiments on the standard dialogue state tracking (DST) dataset, DSTC2~\cite{henderson2014second}.
+We present experiments on the standard dialogue state tracking (DST) dataset, DSTC2~\cite{henderson2014second}.
 On the one hand, RNN models became state of the art in DST,
 on the other hand, most state-of-the-art models are only turn-based and require dataset-specific preprocessing (e.g. DSTC2-specific) in order to achieve state-of-the-art results.
 We implemented two architectures which can be used in incremental settings and require almost no preprocessing.
 We compare their performance to the benchmarks on DSTC2 and discuss their properties.
-With only trivial preprocessing, the performance of our models is close to the state-of-the-art results.
+With only trivial preprocessing, the performance of our models is close to the state-of-the-art results.\footnote{
+    {\bf Acknowledgment:} We thank Mirek Vodolán and Ondřej Dušek for useful comments.
+    This research was partly funded by the Ministry of Education, Youth and Sports of the Czech Republic under the grant agreement LK11221, core research funding, grant GAUK 1915/2015, and also partially supported by SVV project number 260 333. 
+    We gratefully acknowledge the support of NVIDIA Corporation with the donation of the Tesla K40c GPU used for this research.
+    Cloud computational resources were provided by the MetaCentrum under the program LM2010005 and the CERIT-SC under the program Centre CERIT Scientific Cloud, part of the Operational Program Research and Development for Innovations, Reg.\ no. CZ.1.05/3.2.00/08.0144.}
 \end{abstract}
 
 \section{Introduction}
@@ -145,16 +149,11 @@ The second model uses a decoder in order to predict values one after each other 
 % We also experimented with single classifier which predicts the labels jointly (see Figure~\ref{fig_encjoint}, but it suffers from data sparsity of the predicted tuples, so we focused only on the independent label prediction and encoder-decoder models.
 We also experimented with single classifier which predicts the labels jointly (see Figure~1, but it suffers from data sparsity of the predicted tuples, so we focused only on the independent label prediction and encoder-decoder models.
 
-The models were implemented using TensorFlow~\cite{abaditensorflow} framework. By introducing more and more complex models, we aim to overcome the data sparsity problem and incorrect independence assumptions.
+The models were implemented using TensorFlow~\cite{abaditensorflow} framework. 
+By introducing encoder-decoder architecture, we aim to overcome the data sparsity problem and incorrect independence assumptions.
 
-% \subsection{Predicting labels jointly}
-% \label{sec:joint}
-% The Joint model uses a single classifier to predict a tuple of slots (see Figure~\ref{fig_encjoint}).
-% The model is easy to implement and it optimizes directly the evaluation metric\OD{(see sekce s evaluací?)} \ODdel{of predicting the labels jointly.}
-% However, with \OD{an} increasing number of slots\OD{,} the model suffers from the curse of dimensionality and therefore\OD{,} it is not convenient for small datasets.\OD{tohle bych asi nějak rozvedl, nebo fakt vyhodil}
 \begin{figure}
 \vspace{-0.80em}
-% \includegraphics[width=0.5\textwidth]{encoder_joint}
 \begin{center}
 \includegraphics[height=9em]{encoder_joint}
 \caption{The joint label predictions using RNN from last hidden state $h_T$. The $h_T$ represents the whole dialog history of $T$ words. The RNN takes as input for each word $i$ an embedding and binary features concatenated to~vector~$X_{i}$.}
@@ -166,14 +165,12 @@ The models were implemented using TensorFlow~\cite{abaditensorflow} framework. B
 \subsection{Independent classifiers for each label}
 \label{sec:indep}
 The independent model predicts slots $food$, $area$ and $price range$ based on the last hidden state $h_{T}$ independently using three classifiers.
- % proc \OD{are} ??!!
 Independent slots prediction using one classifier per each slot is straightforward to implement, but the model introduces an unrealistic assumption of uncorrelated slot properties.
 In case of DSTC2 and the Cambridge restaurant domain, it is hard to believe that, e.g., the slots $area$ and $price range$ are not correlated.
 
 \begin{figure}
 \begin{center}
 \includegraphics[height=9.5em]{encoder}
-% \includegraphics[width=0.5\textwidth]{encoder}
 \caption{The RNN encodes the word history into dialogue state $h_T$ and predicts slot values independently.}
 \end{center}
 \vspace{-0.80em}
@@ -344,11 +341,6 @@ We also observed that obtaining high accuracy for dialogue state tracking on DST
 We would like to investigate how much the introduced database features improved the performance of the models, and evaluate our models using ASR n-best list.
 Our future plans also concern collecting and annotating more data which would allow us to evaluate the models on another task-oriented dataset.
 To our knowledge there is no dataset which can be used for evaluating incremental dialogue state trackers so it would be beneficial to collect annotation on word level so one can evaluate incremental DST models.
-
-{\small {\bf Acknowledgment:} We thank Mirek Vodolán and Ondřej Dušek for useful comments.
-This research was partly funded by the Ministry of Education, Youth and Sports of the Czech Republic under the grant agreement LK11221, core research funding, grant GAUK 1915/2015, and also partially supported by SVV project number 260 333. 
-We gratefully acknowledge the support of NVIDIA Corporation with the donation of the Tesla K40c GPU used for this research.
-Cloud computational resources were provided by the MetaCentrum under the program LM2010005 and the CERIT-SC under the program Centre CERIT Scientific Cloud, part of the Operational Program Research and Development for Innovations, Reg.\ no. CZ.1.05/3.2.00/08.0144.}
 
 \newpage
 \bibliographystyle{plain}
