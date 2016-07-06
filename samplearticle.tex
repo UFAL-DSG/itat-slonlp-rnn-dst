@@ -207,11 +207,10 @@ Secondly, the decoding time is quadratic in the length of the decoded sequences,
 We report results on the standard DSTC2 data split where we used 516 dialogues as a validation set for early stopping~\cite{prechelt1998early} and the remaining 1612 dialogues for training.
 We use 1-best Automatic Speech Recognition (ASR) transcriptions of conversation history on the input and measure joint slot accuracy.
 We evaluate the models using the recommended measure accuracy with schedule 2 which skips the first turns where the believe tracker does not track any values. 
-We also evaluated the models on a randomly split DSTC2 dataset\, and the details are described in Section~\ref{sec:split}.
-For the results on the standard split of DSTC2, see~Table~1.
+In addition, the models are evaluated on a randomly split DSTC2 dataset (see Section~\ref{sec:split}).
 
 For all our experiments, we train word embeddings of size 100 and use the encoder state size of size 100, together with a dropout keep probability of $0.7$ for both encoder inputs and outputs.
-These parameters where selected by a grid search over the hyper-parameters on development data.
+These parameters are selected by a grid search over the hyper-parameters on development data.
 
 \subsection{Training}
 \label{sec:train}
