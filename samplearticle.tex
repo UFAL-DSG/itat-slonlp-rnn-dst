@@ -39,7 +39,7 @@
 \maketitle              % typeset the title of the contribution
 
 %% REVIEWERS comments %%%%%%%%
-\OP{not standard metric and comparison to other systems \\}
+% \OP{not standard metric and comparison to other systems \\} - DONE
 % \OP{reference na dstc2 - todo provide link to footnote \\} - DONE
 % \OP{Predstavit DST co to je - summarizing dialogue history in formal state} - DONE? - have no space/skills to do it better \\
 % \OP{Opravit vetu "A dialogue state tracker summarizes the hidden information state (HIS)\cite{young2010hidden} of a user's goal from the conversation history." - reviewer alergicky na ni} - DONE\\
@@ -55,10 +55,9 @@
 %% End of REVIEWERS comments %%%%%%%%
 
 %%%% MY TODO %%%%
-% \TODO{nechceme reportovat i train a valid? me to vetsinou v clancich zajima} muzem kdyz to stihnem, ale validace na trenovani trva dlouho a nechce se mi to prepocitavat na validacni sade to mame
-\OP{jak dlouho trvala epocha - proc je tak pomala? \\}
-\OP{accuracies on train set \\}
-\OP{myslim, ze to mam dobre, ale v camera ready to zkontrolujem - nestiham. \PB{nemusi byt podekovani metacentru v nejake jejich oficialni podobe - link v komentari?} \url{https://wiki.metacentrum.cz/wiki/Pravidla-BLABLA}}
+% \OP{jak dlouho trvala epocha - proc je tak pomala? \\}
+% \OP{accuracies on train set \\}  - not time
+% \OP{myslim, ze to mam dobre, ale v camera ready to zkontrolujem - nestiham. \PB{nemusi byt podekovani metacentru v nejake jejich oficialni podobe - link v komentari?} \url{https://wiki.metacentrum.cz/wiki/Pravidla-BLABLA}} - Done
 %%% END OF MY TODO %%%
 
 
@@ -73,14 +72,15 @@ With only trivial preprocessing, the performance of our models is close to the s
     {\bf Acknowledgment:} We thank Mirek Vodolán and Ondřej Dušek for useful comments.
     This research was partly funded by the Ministry of Education, Youth and Sports of the Czech Republic under the grant agreement LK11221, core research funding, grant GAUK 1915/2015, and also partially supported by SVV project number 260 333. 
     We gratefully acknowledge the support of NVIDIA Corporation with the donation of the Tesla K40c GPU used for this research.
-    Cloud computational resources were provided by the MetaCentrum under the program LM2010005 and the CERIT-SC under the program Centre CERIT Scientific Cloud, part of the Operational Program Research and Development for Innovations, Reg.\ no. CZ.1.05/3.2.00/08.0144.}
+    Computational resources were provided by the CESNET LM2015042 and the CERIT Scientific Cloud LM2015085, provided under the programme ``Projects of Large Research, Development, and Innovations Infrastructures''.
+    }
 \end{abstract}
 
 \section{Introduction}
-Our contribution is threefold. 
-First, we briefly introduce dialogue state tracking task.
-Later, in Section~\ref{sec:model} we compare two different RNN architectures for dialogue state tracking.
-Finally, in~Section~\ref{sec:eval} we describe state-of-the art word-by-word dialogue state trackers architectures and propose to use a new encoder-decoder architecture for the DST task.
+ 
+This paper compares two different RNN architectures for dialogue state tracking (see Section~\ref{sec:model}).
+We describe state-of-the art word-by-word dialogue state trackers architectures and propose to use a new encoder-decoder architecture for the DST task (see Section~\ref{sec:eval}).
+First, we briefly introduce dialogue state tracking.
 
 Dialogue state tracking (DST) is a standard and important task for evaluating task-oriented conversational agents~\cite{williams2013dialog, henderson2014second, henderson2014third}.
 Such agents play role of domain expert on narrow domain and users ask for information through conversation in natural language (see system and user responses in~Figure~\ref{fig:example}).
@@ -114,7 +114,7 @@ Based on our experiments, we conclude that DSTC2 might suggest too pessimistic v
 
 
 \section{Dialogue state tracking on DSTC2 dataset}\label{sec:dst}
-Dialogue state tracking is task which updates distribution of representation of dialogue history.
+Dialogue state trackers maintain their believes about users goals by updating probabilities of dialogue history representations.
 In the DSTC2 dataset, the history is captured by dialogue act items and their probabilities.
 A Dialogue act item is a triple of the following form $(actionType, slotName, slotValue)$.
 
@@ -125,12 +125,12 @@ The task of the domain is defined by a~database of restaurants and their propert
 The~database and a~manually designed ontology which captures a~restaurant domain are distributed with the dataset.
 
 \section{Models}\label{sec:model}
-Our models are all based on a recurrent neural network (RNN) encoder~\cite{werbos1990backpropagation}. 
+Our models are all based on a RNN encoder~\cite{werbos1990backpropagation}. 
 Similarly to RNN encoder of~\cite{zilka2015incremental}, the models update their hidden states $h$ after processing each word. 
-The RNN encoder takes as inputs the previous state $h_{t-1}$ representing history for first $t-1$ words and features $X_t$ for the current word $w_t$. 
+The encoder takes as inputs the previous state $h_{t-1}$ representing history for first $t-1$ words and features $X_t$ for the current word $w_t$. 
 It outputs state $h_t$ representing the whole dialogue history up to current word.
 We use a~Gated Recurrent Unit (GRU) cell~\cite{cho2014gru} as the update function instead of simple RNN cell because it does not suffer from vanishing gradient~\cite{TODO_vanishing_gradient}.
-We learn its parameters during training.
+The model optimizes its parameters during training.
 
 For each input token, our RNN encoder reads the word embedding~\cite{bengio2003neural} of this token along with several binary features. 
 The binary features for each word are:
@@ -253,7 +253,7 @@ This property can explain a smaller performance drop between the test set from r
 \begin{table}
 \vspace{-0.80em}
 \begin{center}
-\begin{tabular}{r@{\quad}rll}
+\begin{tabular}{l@{\quad}rll}
 \hline
 \multicolumn{1}{l}{\rule{0pt}{12pt}
                    Model}&\multicolumn{1}{l}{Dev set}&\multicolumn{2}{l}{Test set}\\[2pt]
@@ -261,11 +261,17 @@ This property can explain a smaller performance drop between the test set from r
 % Joint  &  todo &  todo \\
 % /a/SSD/oplatek/e2end/log/2016-06-08-17-31-38.400-dstc-INDEP_labels-d0.7-w100-e100/
 % /a/SSD/oplatek/e2end/log/TEST-ORIGINAL-2016-06-08-17-31-38.400dstc-INDEP_labels-d0.7-w100-e100-reward-0.9080-step-0036224
-Indep  &   0.91 & 0.76 \\
-EncDec &   0.94 & 0.73 \\
+    Indep  &   \OP{0.91} & \OP{0.76} \\
+    EncDec &   \OP{0.94} & \OP{0.73} \\
+\hline
+    Vodolán et al.~\cite{vodolan2015hybrid} & - & 0.745 \\
+    Žilka, Jurčíček~\cite{zilka2015incremental} & 0.69 & 0.72 \\
+    Henderson et al.~\cite{henderson2013deep} & - & 0.737 \\
+\hline
+    DSTC2 stacking ensemble~\cite{henderson2014second} & - & 0.789 \\
 \hline
 \end{tabular}
-\caption{Accuracy on development and test set}
+\caption{Accuracy on DSTC2 dataset. The first group contains our systems which use ASR output as input, the second group lists systems using also ASR hypothesis as input. The third group shows the results for ensemble model using ASR output nd also live language understanding annotations.}
 \vspace{-2em}
 \end{center}
 \label{tab:dstc}
@@ -282,9 +288,9 @@ The encoder-decoder system is competitive with state-of-the art architectures an
 
 % FIXME include results from other papers
 \begin{table}
-\vspace{-0.80em}
+\vspace{-0.20em}
 \begin{center}
-\begin{tabular}{r@{\quad}rll}
+\begin{tabular}{l@{\quad}rll}
 \hline
 \multicolumn{1}{l}{\rule{0pt}{12pt}
                    Model}&\multicolumn{1}{l}{Dev set}&\multicolumn{2}{l}{Test set}\\[2pt]
@@ -294,7 +300,7 @@ Indep  &   0.87 & 0.89 \\
 EncDec &   0.94 & 0.91 \\
 \hline
 \end{tabular}
-\caption{Accuracy on the re-split DSTC2 data.}
+\caption{Accuracy of our models on the re-split DSTC2 data.}
 \vspace{-2em}
 \end{center}
 \label{tabsplit}
@@ -307,7 +313,7 @@ The~results in Table~2 show that the complexity of the task dropped significantl
 
 
 \section{Related work}\label{sec:related}
-There are numerous systems which reported on the DSTC2 dataset, we discuss only the systems which use RNN.
+There are numerous systems which reported on the DSTC2 dataset, we discuss only the systems which use RNNs.
 In general, the RNN systems achieved excellent results.
 
 Our system is related to the RNN tracker of Žilka and Jurčíček~\cite{zilka2015incremental},
@@ -331,15 +337,14 @@ However, the reported end-to-end model was evaluated only on artificial dataset 
 \section{Conclusion}\label{sec:conc}
 We presented and compared two dialogue state tracking models which are based on state-of-the-art architectures using recurrent neural networks.
 To our knowledge, we are the first to use an encoder-decoder model for the dialogue state tracking task, and we encourage others to do so because it is competitive with the standard RNN model.\footnote{The presented experiments are published at \url{https://github.com/oplatek/e2end/} under Apache license. Informal experiments were conducted during the Statistical Dialogue Systems course at Charles University (see \url{https://github.com/oplatek/sds-tracker}).}
-Note that the standard RNN model achieves almost state-of-the-art results.
+The models are comparable to state-of-the-art.
 
 We evaluated the models on DSTC2 dataset containing task-oriented dialogues in restaurant domain. 
 We trained the models using only ASR 1-best transcriptions and task-specific lexical features defined by the task database.
-We also observed that obtaining high accuracy for dialogue state tracking on DSTC2 test set is notoriously hard and that the task becomes substantially easier if the data is reshuffled.
+We observed that dialogue state tracking on DSTC2 test set is notoriously hard and that the task becomes substantially easier if the data is reshuffled.
 
-We would like to investigate how much the introduced database features improved the performance of the models, and evaluate our models using ASR n-best list.
-Our future plans also concern collecting and annotating more data which would allow us to evaluate the models on another task-oriented dataset.
-To our knowledge there is no dataset which can be used for evaluating incremental dialogue state trackers so it would be beneficial to collect annotation on word level so one can evaluate incremental DST models.
+As future work, we plan to investigate influence of the introduced database features on models accuracy.
+To our knowledge there is no dataset which can be used for evaluating incremental dialogue state trackers, so it would be beneficial to collect annotation on word level so one can evaluate incremental DST models.
 
 \newpage
 \bibliographystyle{plain}
