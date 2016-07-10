@@ -40,7 +40,7 @@
 
 %% REVIEWERS comments %%%%%%%%
 \OP{not standard metric and comparison to other systems \\}
-\OP{reference na dstc2 - todo provide link to footnote \\}
+% \OP{reference na dstc2 - todo provide link to footnote \\} - DONE
 % \OP{Predstavit DST co to je - summarizing dialogue history in formal state} - DONE? - have no space/skills to do it better \\
 % \OP{Opravit vetu "A dialogue state tracker summarizes the hidden information state (HIS)\cite{young2010hidden} of a user's goal from the conversation history." - reviewer alergicky na ni} - DONE\\
 % \OP{jak pouzivane rnn} - DONE \\
@@ -119,7 +119,7 @@ In the DSTC2 dataset, the history is captured by dialogue act items and their pr
 A Dialogue act item is a triple of the following form $(actionType, slotName, slotValue)$.
 
 The DSTC2 is a standard dataset for DST, and most of state-of-the-art systems in DST have reported their performance on~this dataset~\cite{henderson2014second}. 
-The full dataset is freely available since January 2014 and contains 1612 dialogues in the training set, 506 dialogues in the development set and 1117 dialogues in the test set.\footnote{Available online at~\url{TODO}}
+The full dataset is freely available since January 2014 and contains 1612 dialogues in the training set, 506 dialogues in the development set and 1117 dialogues in the test set.\footnote{Available online at~\url{http://camdial.org/~mh521/dstc/}.}
 The conversations are manually annotated at the turn level where the hidden information state is expressed in form of $(actionType, slotName, slotValue)$ based on the~domain ontology.
 The task of the domain is defined by a~database of restaurants and their properties\footnote{There are six columns in the database: name, food, price\_range, area, telephone, address.}.
 The~database and a~manually designed ontology which captures a~restaurant domain are distributed with the dataset.
