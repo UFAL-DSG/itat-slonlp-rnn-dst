@@ -67,8 +67,8 @@
 This paper discusses models for dialogue state tracking using recurrent neural networks (RNN).
 We present experiments on the standard dialogue state tracking (DST) dataset, DSTC2~\cite{henderson2014second}.
 On the one hand, RNN models became the state of the art models in DST,
-on the other hand, most state-of-the-art \OD{DST} models are only turn-based and require dataset-specific preprocessing (e.g. DSTC2-specific) in order to achieve such results.
-We implemented two architectures which can be used in incremental settings\OD{in an incremental setting} and require almost no preprocessing.
+on the other hand, most state-of-the-art DST models are only turn-based and require dataset-specific preprocessing (e.g. DSTC2-specific) in order to achieve such results.
+We implemented two architectures which can be used in an incremental setting and require almost no preprocessing.
 We compare their performance to the benchmarks on DSTC2 and discuss their properties.
 With only trivial preprocessing, the performance of our models is close to the state-of-the-art results.\footnote{
     {\bf Acknowledgment:} We thank Mirek Vodolán and Ondřej Dušek for useful comments.
@@ -80,16 +80,12 @@ With only trivial preprocessing, the performance of our models is close to the s
 
 \section{Introduction}
  
-This paper compares two different RNN architectures for dialogue state tracking (see Section~\ref{sec:model}).
-We describe state-of-the art word-by-word dialogue state tracker architectures and propose to use a new encoder-decoder architecture for the DST task (see Section~\ref{sec:eval}).
-First, we briefly introduce dialogue state tracking.
-
 Dialogue state tracking (DST) is a standard and important task for evaluating task-oriented conversational agents~\cite{williams2013dialog, henderson2014second, henderson2014third}.
-Such agents play \OD{the} role of \OD{a} domain expert on\OD{in a} narrow domain\OD{,} and users ask for information through conversation in natural language (see \OD{the example} system and user responses in~Figure~\ref{fig:example}).
-A dialogue state tracker summarizes the dialogue history and maintains \OD{a} probability distribution over \OD{the (possible)} user's goal\OD{s} (see annotation in~Figure~\ref{fig:example}).
-Dialogue agents as introduced in~\cite{young2010hidden} decide about \OD{a/the} next action based on the dialogue state distribution from\OD{given by/obtained from} the tracker.
-User's goals are expressed in a~formal language, typically represented as a dialogue act item (DAI)\OD{DAIs? viz též komentář k obrázku} (see Section~\ref{sec:dst}) and the tracker updates probability for each item.
-Since the dialogue state is a latent variable\OD{,} it is called a~hidden information state (HIS)~\cite{young2010hidden} and one needs to label the~conversations in order to train a dialogue state tracker using supervised learning.\OD{vynechal bych zmínku o HIS (citaci klidně nech), přijde mi matoucí}
+Such agents play the role of a domain expert in a narrow domain, and users ask for information through conversation in natural language (see the example system and user responses in~Figure~\ref{fig:example}).
+A dialogue state tracker summarizes the dialogue history and maintains a probability distribution over the (possible) user's goals (see annotation in~Figure~\ref{fig:example}).
+Dialogue agents as introduced in~\cite{young2010hidden} decide about the next action based on the dialogue state distribution given by the tracker.
+User's goals are expressed in a~formal language, typically represented as a dialogue act items (DAIs) (see Section~\ref{sec:dst}) and the tracker updates probability for each item.
+The dialogue state is a latent variable~\cite{young2010hidden} and one needs to label the~conversations in order to train a dialogue state tracker using supervised learning.
 It was shown that with a better dialogue state tracker, conversation agents achieve better success rate in overall completion of the their task~\cite{jurvcivcek2012reinforcement}.
 
 \begin{figure}
@@ -103,22 +99,23 @@ It was shown that with a better dialogue state tracker, conversation agents achi
     \food{n+2}{Indian}, \area{west}, \pricerange{None} \\
     \sys{India House is a nice place in the west of town serving tasty Indian food.} \\
     \dots
-    \caption{Example of golden annotation of Dialogue Act Item (DAI). The dialogue act item comprises from act type (all examples have type {\it inform}) and slots ({\it food, area, pricerange}) and their values (e.g. {\it Indian, west, None}).\OD{proč je tohle ``DAI'' a ne celý stav/DA?}}
+    \caption{Example of golden annotation of Dialogue Act Items (DAIs). The dialogue act items comprise from act type (all examples have type {\it inform}) and slots ({\it food, area, pricerange}) and their values (e.g. {\it Indian, west, None}).}
 \vspace{-0.70em}
 \label{fig:example}
 \end{figure}
 
-\OD{tady ten text moc nenavazuje. já bych možná začal celý článek "Dialogue state tracking is..." a až sem pak hodil "This paper compares..." (bez tý věty "First, we briefly introduce...")}
+This paper compares two different RNN architectures for dialogue state tracking (see Section~\ref{sec:model}).
+We describe state-of-the art word-by-word dialogue state tracker architectures and propose to use a new encoder-decoder architecture for the DST task (see Section~\ref{sec:eval}).
 
-We focus only on the {\it goal} slot predictions because the other groups are trivial to predict\footnote{The slots {\it Requested} and {\it Method} have accuracies 0.95 and 0.95 on the test set according to the state-of-the-art~\cite{williams2014web}.}.\OD{a tohle je vůbec docela technický a chybí tomu kontext -- nešlo by to schovat někam později?}
+We focus only on the {\it goal} slot predictions because the other groups are trivial to predict\footnote{The slots {\it Requested} and {\it Method} have accuracies 0.95 and 0.95 on the test set according to the state-of-the-art~\cite{williams2014web}.}. % \OD{a tohle je vůbec docela technický a chybí tomu kontext -- nešlo by to schovat někam později?}
 
 We also experiment with re-splitting of the DSTC2 data because there are considerable differences between the standard train and test datasets~\cite{henderson2014second}.
-Since \OD{the} training, development and test set data are distributed differently, the resulting performance difference between training and test data is rather high.
-Based on our experiments, we conclude that DSTC2 might suggest \OD{a} too pessimistic view of the state-of-the-art methods in dialogue state tracking caused by the data distribution mismatch.
+Since the training, development and test set data are distributed differently, the resulting performance difference between training and test data is rather high.
+Based on our experiments, we conclude that DSTC2 might suggest a~too pessimistic view of the state-of-the-art methods in dialogue state tracking caused by the data distribution mismatch.
 
 
 \section{Dialogue state tracking on DSTC2 dataset}\label{sec:dst}
-Dialogue state trackers maintain their believes\OD{beliefs} about users\OD{'} goals by updating probabilities of dialogue history representations.
+Dialogue state trackers maintain their believes beliefs about users' goals by updating probabilities of dialogue history representations.
 In the DSTC2 dataset, the history is captured by dialogue act items and their probabilities.
 A Dialogue act item is a triple of the following form $(actionType, slotName, slotValue)$.
 
@@ -130,31 +127,29 @@ The~database and the~manually designed ontology that captures a~restaurant domai
 
 \section{Models}\label{sec:model}
 Our models are all based on a RNN encoder~\cite{werbos1990backpropagation}. 
-The models update their hidden states $h$ after processing each word similarly to \OD{the} RNN encoder of~\citet{zilka2015incremental}.
-The encoder takes as inputs the previous state $h_{t-1}$\OD{,} representing history for first $t-1$ words\OD{,} and features $X_t$ for the current word $w_t$. 
-It outputs \OD{the current} state $h_t$ representing the whole dialogue history up to current word.
-We use a~Gated Recurrent Unit (GRU) cell~\cite{cho2014gru} as the update function instead of \OD{a} simple RNN cell because it does not suffer from \OD{the} vanishing gradient\OD{ problem}~\cite{hochreiter2001gradient}.
+The models update their hidden states $h$ after processing each word similarly to the RNN encoder of~\citet{zilka2015incremental}.
+The encoder takes as inputs the previous state $h_{t-1}$, representing history for first $t-1$ words, and features $X_t$ for the current word $w_t$. 
+It outputs the current state $h_t$ representing the whole dialogue history up to current word.
+We use a~Gated Recurrent Unit (GRU) cell~\cite{cho2014gru} as the update function instead of a simple RNN cell because it does not suffer from the vanishing gradient problem~\cite{hochreiter2001gradient}.
 The model optimizes its parameters including word embeddings~\cite{bengio2003neural} during training.
 
 For each input token, our RNN encoder reads the word embedding of this token along with several binary features. 
 The binary features for each word are:
 \begin{itemize}
 	\item the speaker role, representing either user or system,
-    \item and also indicators describing whether the word is part of some\OD{a} named entity representing a value from the database.
+    \item and also indicators describing whether the word is part of a named entity representing a value from the database.
 \end{itemize}
-Since \OD{the} DSTC2 database is a simple table with six columns, we introduce six binary features firing if the word is a substring of named entity at\OD{from the} given column.
+Since the DSTC2 database is a simple table with six columns, we introduce six binary features firing if the word is a substring of named entity from the given column.
 For example, the word {\it indian} will not only trigger the feature for column $food$ and its value {\it indian} but also for column restaurant $name$ and its value {\it indian heaven}.
 The features make the data dense by abstracting the meaning from the lexical level. 
 
-Our model variants differ only in the way they predict {\it goal} labels, i.e.\OD{,} $food$, $area$ and $price range$ from the RNN's last encoded state.\footnote{Accuracy measure with schedule 2 on slot $food$, $area$ and $price range$ about which users can inform the system is a featured metric for DSTC2 challenge~\cite{henderson2014second}.} 
+Our model variants differ only in the way they predict {\it goal} labels, i.e., $food$, $area$ and $price range$ from the RNN's last encoded state.\footnote{Accuracy measure with schedule 2 on slot $food$, $area$ and $price range$ about which users can inform the system is a featured metric for DSTC2 challenge~\cite{henderson2014second}.} 
 % The first model predicts the triples of slot values $(food, area, price range)$ jointly from the encoder hidden state $h$.
 The first model predicts the output slot labels independently by employing three independent classifiers (see Section~\ref{sec:indep}).
 The second model uses a decoder in order to predict values one after the other from the $h_{T}$ (see Section~\ref{sec:encdec}).
 % We also experimented with single classifier which predicts the labels jointly (see Figure~\ref{fig_encjoint}, but it suffers from data sparsity of the predicted tuples, so we focused only on the independent label prediction and encoder-decoder models.
-We also experimented with \OD{a} single classifier which predicts the labels jointly (see Figure~1),\OD{to má být figure 2? a nedal by se vyhodit a popisek zakomponovat do Fig.~\ref{fig:encind}?} but it suffers from data sparsity of the predicted tuples, so we focused only on the independent label prediction and encoder-decoder models.\OD{a vůbec celou tuhle větu bys mohl vynechat nebo přehodit do 3.1}
 
-The models were implemented using \OD{the} TensorFlow~\cite{abaditensorflow} framework. 
-By introducing \OD{an/the} encoder-decoder architecture, we aim to overcome the data sparsity problem and the~incorrect independence assumptions.\OD{nepatří tohle za (see Section 3.2)? tady mi to přijde trochu vytržený z kontextu. navic to “incorrect independence” vysvětluješ až v 3.1, tak možná to patří až do sekce 3.2?}
+The models were implemented using the~TensorFlow~\cite{abaditensorflow} framework. 
 
 \begin{figure}
 \vspace{-0.80em}
@@ -163,19 +158,21 @@ By introducing \OD{an/the} encoder-decoder architecture, we aim to overcome the 
 \caption{The joint label predictions using RNN from last hidden state $h_T$. The $h_T$ represents the whole dialog history of $T$ words. The RNN takes as input for each word $i$ an embedding and binary features concatenated to~vector~$X_{i}$.}
 \end{center}
 \vspace{-0.70em}
-\label{fig_encjoint}
+\label{fig:encjoint}
 \end{figure}
 
 \subsection{Independent classifiers for each label}
 \label{sec:indep}
-The independent model consists of three models which predict $food$, $area$ and $price range$ based on the last hidden state $h_{T}$ independently.
-The~independent slot prediction that use\OD{s? / using} one classifier per \ODdel{each} slot is straightforward to implement, but the model introduces an unrealistic assumption of uncorrelated slot properties.
+The independent model (see Figure~\ref{fig:encind}) consists of three models which predict $food$, $area$ and $price range$ based on the last hidden state $h_{T}$ independently.
+The~independent slot prediction that uses one classifier per slot is straightforward to implement, but the model introduces an unrealistic assumption of uncorrelated slot properties.
 In case of DSTC2 and the Cambridge restaurant domain, it is hard to believe that, e.g., the slots $area$ and $price range$ are not correlated.
+
+We also experimented with a~single classifier which predicts the labels jointly (see Figure~\ref{fig:encjoint}) but it suffers from data sparsity of the predicted tuples, so we focused only on the independent label prediction and encoder-decoder models.
 
 \begin{figure}
 \begin{center}
 \includegraphics[height=9.5em]{encoder}
-\caption{The RNN encodes the word history into dialogue state $h_T$ and predicts slot values independently.}\OD{odkaž na obrázek z textu}
+\caption{The RNN encodes the word history into dialogue state $h_T$ and predicts slot values independently.}
 \end{center}
 \vspace{-0.80em}
 \label{fig:encind}
@@ -183,10 +180,11 @@ In case of DSTC2 and the Cambridge restaurant domain, it is hard to believe that
 
 \subsection{Encoder-decoder framework}
 \label{sec:encdec}
-The encoder-decoder model with attention~\cite{bahdanau2014neural} is the most sophisticated model\OD{to zní dost vznešeně, když porovnáváš dva} that we used for slot predictions.
-To our knowledge, we are the~first who used this model for the task of slot predictions.
+We cast the slot predictions problem as a sequence-to-sequence predictions task and we use a~encoder-decoder model with attention~\cite{bahdanau2014neural} to learn this representation together with slot predictions (see Figure~\ref{fig:encdec}).
+To our knowledge, we are the~first who used this model for dialogue state tracking.
 The model is successfully used in machine translation where it is able to handle long sequences with good accuracy~\cite{bahdanau2014neural}.
 In DST, it captures correlation between the decoded slots easily. 
+By introducing the encoder-decoder architecture, we aim to overcome the data sparsity problem and the~incorrect independence assumptions.
 
 We employ the encoder RNN cell that captures the history of the~dialogue which is represented as a~sequence of words from the~user and the~system.
 The words are fed to the encoder as they appear in the dialogue - turn by turn - where the user and the system responses switch regularly.
@@ -203,7 +201,7 @@ Firstly, the model is not trivial to implement\footnote{We modified code from th
 Secondly, the decoding time is asymptotically quadratic in the length of the decoded sequences, but our target sequences are always four tokens long nevertheless.
 \begin{figure}
 \includegraphics[width=0.5\textwidth]{encdec}
-\caption{Encoder decoder with attention predicts goals.}\OD{odkaž na obrázek z textu}
+\caption{Encoder decoder with attention predicts goals.}
 \label{fig:encdec}
 \end{figure}
 
